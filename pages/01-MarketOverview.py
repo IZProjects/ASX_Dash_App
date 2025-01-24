@@ -2,7 +2,7 @@ import dash
 from dash import dcc, html, callback, Output, Input
 import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
-from src.mysql_connect_funcs import get_df_tblName, get_df_query
+from mysql_connect_funcs import get_df_tblName, get_df_query
 
 TABLE_SIZE = 16
 

@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 import pandas as pd
 from io import StringIO
 import dash_mantine_components as dmc
-from src.mysql_connect_funcs import get_df_tblName, get_df_query
+from mysql_connect_funcs import get_df_tblName, get_df_query
 
 pd.options.mode.chained_assignment = None  # default='warn'
 

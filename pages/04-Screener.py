@@ -2,7 +2,7 @@ import dash
 from dash import dcc, html, Input, Output, State, callback, ALL
 import dash_bootstrap_components as dbc
 import re
-from src.mysql_connect_funcs import get_df_query
+from mysql_connect_funcs import get_df_query
 
 dash.register_page(__name__, name='Screener')
 

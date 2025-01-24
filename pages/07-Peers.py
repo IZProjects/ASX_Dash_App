@@ -4,7 +4,7 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.express as px
 import dash_mantine_components as dmc
-from src.mysql_connect_funcs import get_df_tblName, get_df_query, get_cursor
+from mysql_connect_funcs import get_df_tblName, get_df_query, get_cursor
 
 dash.register_page(__name__, name='Peer Comparison') # '/' is home page
 

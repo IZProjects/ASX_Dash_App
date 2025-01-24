@@ -2,8 +2,7 @@ import dash
 from dash import html, Input, Output, callback, dash_table, clientside_callback
 import dash_bootstrap_components as dbc
 import pandas as pd
-import pymysql
-from src.mysql_connect_funcs import get_df_tblName
+from mysql_connect_funcs import get_df_tblName
 
 dash.register_page(__name__, name='Financials')
 def convert_to_percentage(value):

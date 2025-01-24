@@ -2,7 +2,7 @@ import dash
 from dash import html, callback, Output, Input, dash_table
 import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
-from src.mysql_connect_funcs import get_cursor, get_df_query
+from mysql_connect_funcs import get_cursor, get_df_query
 
 dash.register_page(__name__, name='Segment')
 
