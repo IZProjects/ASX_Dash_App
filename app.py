@@ -4,6 +4,7 @@ import dash_bootstrap_components as dbc
 from dash.exceptions import PreventUpdate
 #from dash_bootstrap_templates import ThemeSwitchAIO
 from mysql_connect_funcs import get_df_tblName, get_df_query
+from flask import Flask
 
 df = get_df_tblName("metadataTBL")
 df['label'] = df['symbol'] + ': ' + df['name'] + ' (' + df['exchange'] + ')'
@@ -13,7 +14,10 @@ value = df['value'].to_list()
 
 options = [{"label": lbl, "value": val} for lbl, val in zip(label, value)]
 
-app = dash.Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.SPACELAB])
+server = Flask(__name__)
+
+app = dash.Dash(__name__, server=server, use_pages=True, external_stylesheets=[dbc.themes.SPACELAB])
+
 
 sidebar = html.Div(
     [
