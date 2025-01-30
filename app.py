@@ -17,6 +17,7 @@ options = [{"label": lbl, "value": val} for lbl, val in zip(label, value)]
 server = Flask(__name__)
 
 app = dash.Dash(__name__, server=server, use_pages=True, external_stylesheets=[dbc.themes.SPACELAB])
+#app = dash.Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.SPACELAB])
 
 
 sidebar = html.Div(

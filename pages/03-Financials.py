@@ -2,6 +2,7 @@ import dash
 from dash import html, Input, Output, callback, dash_table, clientside_callback
 import dash_bootstrap_components as dbc
 import pandas as pd
+import dash_mantine_components as dmc
 from mysql_connect_funcs import get_df_tblName
 
 dash.register_page(__name__, name='Financials')
@@ -41,86 +42,59 @@ def reverse_columns(df):
 
     return df_copy
 
-button_group1 = html.Div(
-    [
-        dbc.RadioItems(
-            id="radios_statement",
-            className="btn-group",
-            inputClassName="btn-check",
-            labelClassName="btn btn-outline-primary",
-            labelCheckedClassName="active",
-            options=[
-                {"label": "Income Statement", "value": 'income_statement'},
-                {"label": "Balance Sheet", "value": 'balance_sheet'},
-                {"label": "Cashflow Statement", "value": 'cash_flow_statement'},
-                {"label": "Key Ratios", "value": 'key_ratios'},
-            ],
-            value='income_statement',
-        )
+
+button_group1 = dmc.SegmentedControl(
+    id="radios_statement",
+    value='income_statement',
+    color='indigo',
+    size='md',
+    data=[
+        {"label": "Income Statement", "value": 'income_statement'},
+        {"label": "Balance Sheet", "value": 'balance_sheet'},
+        {"label": "Cashflow Statement", "value": 'cash_flow_statement'},
+        {"label": "Key Ratios", "value": 'key_ratios'},
     ],
-    className="radio-group-180px",
 )
 
 
-button_group2 = html.Div(
-    [
-        dbc.RadioItems(
-            id="radios_period",
-            className="btn-group",
-            inputClassName="btn-check",
-            labelClassName="btn btn-outline-primary",
-            labelCheckedClassName="active",
-            options=[
-                {"label": "Annual", "value": "annual"},
-                {"label": "Quarterly", "value": "quarterly"},
-            ],
-            value="annual",
-        )
+button_group2 = dmc.SegmentedControl(
+    id="radios_period",
+    color='indigo',
+    size='md',
+    data=[
+        {"label": "Annual", "value": "annual"},
+        {"label": "Quarterly", "value": "quarterly"},
     ],
-    className="radio-group-100px",
+    value="annual"
 )
 
 
-button_group3 = html.Div(
-    [
-        dbc.RadioItems(
-            id="radios_units",
-            className="btn-group",
-            inputClassName="btn-check",
-            labelClassName="btn btn-outline-primary",
-            labelCheckedClassName="active",
-            options=[
-                {"label": "K", "value": "K"},
-                {"label": "M", "value": "M"},
-                {"label": "B", "value": "B"},
-            ],
-            value="M",
-        )
+button_group3 = dmc.SegmentedControl(
+    id="radios_units",
+    color='indigo',
+    data=[
+        {"label": "K", "value": "K"},
+        {"label": "M", "value": "M"},
+        {"label": "B", "value": "B"},
     ],
-    className="radio-group-60px",
+    value="M",
 )
 
-button_group4 = html.Div(
-    [
-        dbc.RadioItems(
-            id="radios_direction",
-            className="btn-group",
-            inputClassName="btn-check",
-            labelClassName="btn btn-outline-primary",
-            labelCheckedClassName="active",
-            options=[
-                {"label": "Forward", "value": "Forward"},
-                {"label": "Reverse", "value": "Reverse"},
-            ],
-            value="Forward",
-        )
+
+button_group4 = dmc.SegmentedControl(
+    id="radios_direction",
+    color='indigo',
+    data=[
+        {"label": "Forward", "value": "Forward"},
+        {"label": "Reverse", "value": "Reverse"},
     ],
-    className="radio-group-100px",
+    value="Forward",
 )
 
-export_btn = dbc.Button("Export", id='exportBtn', color="secondary")
-export_btn2 = dbc.Button("Export", id='exportBtn2', color="secondary")
-currency_btn = dbc.Button(id='currencytBtn',  color="primary")
+export_btn = dmc.Button("Export", id='exportBtn', color="gray")
+
+export_btn2 = dmc.Button("Export", id='exportBtn2', color="gray")
+
 
 
 # Layout
@@ -138,12 +112,13 @@ layout = dbc.Spinner(dbc.Container([
                 width=2, style={'text-align': 'right'}),
     ], style={'margin-bottom': '10px'}),
     dbc.Row(html.Hr()),
-    dbc.Row([dbc.Col(button_group1, width=9),
-             dbc.Col(button_group2, width=3)], style={'margin-bottom': '20px'}),
-    dbc.Row([dbc.Card([dbc.CardHeader(dbc.Row([dbc.Col(html.H4(id='statement_name'), width=6),
-                                               dbc.Col(currency_btn, width=1),
-                                               dbc.Col(button_group3, width=2),
-                                               dbc.Col(button_group4, width=2),
+
+    dbc.Row([dbc.Col(button_group1, width=10),
+             dbc.Col(button_group2, width=2)], style={'margin-bottom': '20px'}),
+
+    dbc.Row([dbc.Card([dbc.CardHeader(dbc.Row([dbc.Col(html.H4(id='statement_name'), width=4),
+                                               dbc.Col(button_group3, width=3),
+                                               dbc.Col(button_group4, width=4),
                                                dbc.Col(export_btn, width=1)])),
                        dbc.CardBody([dbc.Row([dbc.Col(id='table-container', width=12)], style={'margin-bottom': '40px'}),
                                     dbc.Row([dbc.Col(width=11, id='sup_title'),
@@ -151,17 +126,6 @@ layout = dbc.Spinner(dbc.Container([
                                     dbc.Row([dbc.Col(id='table-container2', width=12)], id='table2_row')]
                                     )])])
 ]),color="primary",delay_hide=10,delay_show=15,spinner_style={"position":"absolute", "top":"20%"})
-
-
-@callback(
-    Output(component_id='currencytBtn', component_property='children'),
-     Input("single_ticker_metadata", "data")
-)
-def get_currency(metadata):
-    df_metadata = pd.DataFrame.from_dict(metadata)
-    df_metadata = df_metadata.reset_index()
-    currency = df_metadata.at[0, 'currency']
-    return currency
 
 
 @callback(

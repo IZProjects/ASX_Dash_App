@@ -8,6 +8,7 @@ from io import StringIO
 import dash_mantine_components as dmc
 from mysql_connect_funcs import get_df_tblName, get_df_query
 
+
 pd.options.mode.chained_assignment = None  # default='warn'
 
 
@@ -55,46 +56,32 @@ def get_total_page(page_size, total_data):
   return total_page
 
 
-button_group1 = html.Div(
-    [
-        dbc.RadioItems(
-            id="radios_tf",
-            className="btn-group",
-            inputClassName="btn-check",
-            labelClassName="btn btn-outline-primary",
-            labelCheckedClassName="active",
-            options=[
-                {"label": "3m", "value": '3m'},
-                {"label": "6m", "value": '6m'},
-                {"label": "1y", "value": '1y'},
-                {"label": "3y", "value": '3y'},
-                {"label": "5y", "value": '5y'},
-                {"label": "10y", "value": '10y'},
-                {"label": "All", "value": 'All'},
-            ],
-            value='1y',
-        )
+button_group1 = dmc.SegmentedControl(
+    id="radios_tf",
+    color='indigo',
+    data=[
+        {"label": "3m", "value": '3m'},
+        {"label": "6m", "value": '6m'},
+        {"label": "1y", "value": '1y'},
+        {"label": "3y", "value": '3y'},
+        {"label": "5y", "value": '5y'},
+        {"label": "10y", "value": '10y'},
+        {"label": "All", "value": 'All'},
     ],
-    className="radio-group-60px",
+    value='1y',
+    size='md'
 )
 
 
-button_group2 = html.Div(
-    [
-        dbc.RadioItems(
-            id="radios_type",
-            className="btn-group",
-            inputClassName="btn-check",
-            labelClassName="btn btn-outline-primary",
-            labelCheckedClassName="active",
-            options=[
-                {"label": "Line", "value": "line"},
-                {"label": "Candle", "value": "candle"},
-            ],
-            value="line",
-        )
+button_group2 = dmc.SegmentedControl(
+    id="radios_type",
+    color='indigo',
+    data=[
+        {"label": "Line", "value": "line"},
+        {"label": "Candle", "value": "candle"},
     ],
-    className="radio-group-80px",
+    value="line",
+    size='md'
 )
 
 # Layout
@@ -109,10 +96,10 @@ layout = dbc.Spinner(dbc.Container([
                      dbc.Badge(id='currency_badge', color="primary", className="me-1"),
                      dbc.Badge(id='sector_badge', color="warning", className="me-1"),
                      dbc.Badge(id='industry_badge', color="danger", className="me-1"),
-                     dbc.Badge(id='category_badge', color="dark", className="me-1")], ))
+                     dbc.Badge(id='category_badge', color="dark", className="me-1")],))
                  ], width=10),
         dbc.Col([dbc.Row(html.H2(id='stock_price')),
-                 dbc.Row(html.P(id="price_change"), id='price_change_row')],
+                 dbc.Row(html.P(id="price_change"),id='price_change_row')],
                 width=2, style={'text-align': 'right'}),
     ], style={'margin-bottom': '10px'}),
 
@@ -122,7 +109,7 @@ layout = dbc.Spinner(dbc.Container([
             dbc.CardHeader(dbc.Row(
                         [dbc.Col(button_group1, style={'margin-bottom': '10px', 'margin-top': '10px'}, width=6),
                          dbc.Col(button_group2, style={'margin-bottom': '10px', 'margin-top': '10px'}, width=3),
-                         dbc.Col(dbc.Button("Show/Hide", id='collapse-button', color='primary'),
+                         dbc.Col(dmc.Button("Show/Hide", id='collapse-button', color='indigo', size='md'),
                                  style={'margin-bottom': '10px', 'margin-top': '10px', "display": "flex",
                                         "justify-content": "flex-end"}, width=3)])
             ),
@@ -177,6 +164,8 @@ def get_prices(ticker):
     code = ticker.replace('_', '.')
     query = f"SELECT * FROM real_time WHERE code = '{code}'"
     df = get_df_query(query)
+
+
     price = '$' + str(df.at[0, 'close'])
     change = df.at[0, 'change']
     change_p = df.at[0, 'change_p']
@@ -190,35 +179,6 @@ def get_prices(ticker):
         change_line = str(change) + ' (' + str(round(float(change_p), 2)) + '%)'
         style = {'color': 'red'}
     return price, change_line, style
-
-@callback(
-     [Output("stock_name", "children"),
-      Output("sector_badge", "children"),
-     Output("industry_badge", "children"),
-     Output("currency_badge", "children"),
-      Output("category_badge", "children"),],
-     [Input("single_ticker_metadata", "data"),
-      Input("ticker", "data")]
-)
-def print_tags(metadata,ticker):
-    df_metadata = pd.DataFrame.from_dict(metadata)
-    df_metadata = df_metadata.reset_index()
-    sector = df_metadata.at[0, 'morningstar_sector']
-    industry = df_metadata.at[0, 'morningstar_industry']
-    currency = df_metadata.at[0, 'currency']
-    df_metadata['title'] = df_metadata['name'] + ' (' + df_metadata['symbol'] + ')'
-    name = df_metadata.at[0, 'title']
-    if ticker is None:
-        ticker = "TPG_AU"
-
-    df = get_df_tblName("Peter_Lynch_Category")
-    if ticker[0:3] in df['ticker'].values:
-        category = df[df['ticker'] == ticker[0:3]]
-        category = category.reset_index(drop=True)
-        category = category.at[0, 'content']
-    else:
-        category = ''
-    return name,sector,industry,currency,category
 
 @callback(
     [Output("table1", "children"),
@@ -276,7 +236,34 @@ def print_description(metadata):
     name = df_metadata.at[0, 'title']
     return description,name
 
+@callback(
+     [Output("stock_name", "children"),
+      Output("sector_badge", "children"),
+     Output("industry_badge", "children"),
+     Output("currency_badge", "children"),
+      Output("category_badge", "children"),],
+     [Input("single_ticker_metadata", "data"),
+      Input("ticker", "data")]
+)
+def print_tags(metadata,ticker):
+    df_metadata = pd.DataFrame.from_dict(metadata)
+    df_metadata = df_metadata.reset_index()
+    sector = df_metadata.at[0, 'morningstar_sector']
+    industry = df_metadata.at[0, 'morningstar_industry']
+    currency = df_metadata.at[0, 'currency']
+    df_metadata['title'] = df_metadata['name'] + ' (' + df_metadata['symbol'] + ')'
+    name = df_metadata.at[0, 'title']
+    if ticker is None:
+        ticker = "TPG_AU"
 
+    df = get_df_tblName("Peter_Lynch_Category")
+    if ticker[0:3] in df['ticker'].values:
+        category = df[df['ticker'] == ticker[0:3]]
+        category = category.reset_index(drop=True)
+        category = category.at[0, 'content']
+    else:
+        category = ''
+    return name,sector,industry,currency,category
 
 @callback(
     Output("collapse", "is_open"),
