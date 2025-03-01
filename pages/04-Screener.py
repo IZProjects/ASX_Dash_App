@@ -1,5 +1,5 @@
 import dash
-from dash import dcc, html, Input, Output, State, callback, ALL
+from dash import dcc, html, Input, Output, State, callback, ALL, dash_table
 import dash_bootstrap_components as dbc
 import re
 from mysql_connect_funcs import get_df_query
@@ -178,7 +178,8 @@ layout = dbc.Spinner(dbc.Container([
     dcc.Store(id='store_exchange', storage_type='session',data={}),
     dcc.Store(id='query', storage_type='session',data={}),
     dbc.Row(id='cards_section', style={'margin-bottom': '20px'}),
-    dbc.Row([dbc.Col(modal, width=11), dbc.Col(dbc.Button('Submit', id='submit_button', color='primary', outline=True))]),
+    dbc.Stack([modal, dbc.Button('Submit', id='submit_button', color='primary', outline=True)],
+              direction="horizontal", gap=3, className="justify-content-between"),
     dbc.Row(id='output-container', style={'margin-top': '20px'}),
 ]),color="primary",delay_hide=10,delay_show=15,spinner_style={"position":"absolute", "top":"20%"})
 
@@ -468,13 +469,30 @@ def print_values(n_clicks, ratio_items, pct_items, singular_items, numeric_items
         df = df.drop_duplicates(subset=["Item"], keep="first")
         df = df.reset_index(drop=True)
         new_df = df.copy()
-        new_df['Item'] = df['Item'].apply(create_link)
+        #new_df['Item'] = df['Item'].apply(create_link)
+        new_df['Item'] = new_df['Item'].apply(lambda x: f'[{x[0:3]}](/02-companyoverview?data={x})')
         twoDPUpdated = [col for col in twoDP if col in new_df.columns]
         new_df[twoDPUpdated] = new_df[twoDPUpdated].map(lambda x: round(float(x), 2))
         KMBUpdated = [col for col in KMB if col in new_df.columns]
         KMBUpdated = list(set(KMBUpdated))
         new_df[KMBUpdated] = new_df[KMBUpdated].map(format_number)
-        table = dbc.Table.from_dataframe(new_df, striped=True, bordered=True, hover=True)
+
+        table = dash_table.DataTable(
+            id='table',
+            columns=[{'id': x, 'name': x, 'type': 'text', 'presentation': 'markdown'} for x in new_df.columns],
+            data=new_df.to_dict('records'),
+            style_header={'backgroundColor': 'rgb(30, 30, 30)',
+                          'color': 'white',
+                          'fontWeight': 'bold',
+                          'textAlign': 'center'},
+            style_cell={'height': 'auto',
+                        'whiteSpace': 'normal'},
+            sort_action='native',
+            css=[{'selector': 'p', 'rule': 'margin: 0; text-align: left; padding-left: 5px; padding-right: 5px;'}],
+        )
+
+
+        #table = dbc.Table.from_dataframe(new_df, striped=True, bordered=True, hover=True)
         return table
 
 

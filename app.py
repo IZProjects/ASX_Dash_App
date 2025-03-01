@@ -7,6 +7,7 @@ from mysql_connect_funcs import get_df_tblName, get_df_query
 from flask import Flask
 
 df = get_df_tblName("metadataTBL")
+df = df.drop_duplicates()
 df['label'] = df['symbol'] + ': ' + df['name'] + ' (' + df['exchange'] + ')'
 df['value'] = df['symbol'] + '_' + df['country']
 label = df['label'].to_list()
@@ -53,7 +54,7 @@ app.layout = dbc.Container([
         [
             dbc.Col([sidebar], width=2, className='column_left', style={'background-color': '#f8f9fa'}),
 
-            dbc.Col([dbc.Row([dbc.Row(dcc.Dropdown(id="my-dynamic-dropdown"))],style={'background-color': 'black', 'position': 'sticky', 'top':'0', 'z-index':'100', 'padding-top': '20px', 'padding-bottom': '27px'}),
+            dbc.Col([dbc.Row([dbc.Row(dcc.Dropdown(id="my-dynamic-dropdown", placeholder="Search..."))],style={'background-color': 'black', 'position': 'sticky', 'top':'0', 'z-index':'100', 'padding-top': '20px', 'padding-bottom': '27px'}),
                      dbc.Row([dash.page_container],style={'padding-top': '20px'})], width=10)
         ]
     )

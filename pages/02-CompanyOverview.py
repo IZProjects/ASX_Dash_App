@@ -90,6 +90,7 @@ layout = dbc.Spinner(dbc.Container([
     dcc.Store(id="dict_weekly", storage_type='session', data={}),
     dcc.Store(id="dict_monthly", storage_type='session', data={}),
     dcc.Store(id="announcementsTBLStore", storage_type='session', data={}),
+
     dbc.Row([
         dbc.Col([dbc.Row(html.H2(id='stock_name')),
                  dbc.Row(html.Span([
@@ -106,12 +107,11 @@ layout = dbc.Spinner(dbc.Container([
     dbc.Row(html.Hr()),
 
     dbc.Row([dbc.Card([
-            dbc.CardHeader(dbc.Row(
-                        [dbc.Col(button_group1, style={'margin-bottom': '10px', 'margin-top': '10px'}, width=6),
-                         dbc.Col(button_group2, style={'margin-bottom': '10px', 'margin-top': '10px'}, width=3),
-                         dbc.Col(dmc.Button("Show/Hide", id='collapse-button', color='indigo', size='md'),
-                                 style={'margin-bottom': '10px', 'margin-top': '10px', "display": "flex",
-                                        "justify-content": "flex-end"}, width=3)])
+            dbc.CardHeader(dbc.Stack([button_group1,
+                                              button_group2,
+                                              dmc.Button("Show/Hide", id='collapse-button', color='indigo', size='md')],
+                                              direction="horizontal", gap=3, className="justify-content-between")
+
             ),
             dbc.Collapse(
                 dbc.CardBody([html.H4(id='chart_heading'),
@@ -144,6 +144,7 @@ layout = dbc.Spinner(dbc.Container([
 
     dbc.Row([dbc.Card(dbc.CardBody([dmc.Text("About the Company", fw=700, size='xl'),
                                     html.P(id='description'), dbc.Row(id='peter_lynch')]))], style={'margin-bottom': '25px'}),
+    dbc.Row(dmc.Text("Announcements", fw=700, size='xl'), style={'margin-bottom': '3px', 'margin-top': '10px'}),
     dbc.Row(html.Small("*Ctrl-Click to open link in new tab")),
     dbc.Row([
         dbc.Table(id='stockAnnoucementsTBL', style={'margin-bottom': '-10px'}),

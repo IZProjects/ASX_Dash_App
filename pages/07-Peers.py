@@ -1,10 +1,11 @@
 import dash
-from dash import dcc, html, callback, Output, Input, dash_table
+from dash import dcc, html, callback, Output, Input
 import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.express as px
 import dash_mantine_components as dmc
 from mysql_connect_funcs import get_df_tblName, get_df_query, get_cursor
+import plotly.graph_objects as go
 
 dash.register_page(__name__, name='Peer Comparison') # '/' is home page
 
@@ -232,10 +233,17 @@ def create_chart1(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1):
     df_melted['Year'] = pd.to_datetime(df_melted['Year'], format='%Y')
     df_melted['Value'] = df_melted['Value'].astype(float)  # Ensure Value is a float
     df_melted = df_melted.sort_values(by=['Year', 'Value'])
+    df_melted = df_melted.reset_index(drop=True)
 
+    unique_items = df_melted['Item'].unique()
+    colors = ["blue", "red", "green", "goldenrod", "purple", "cyan"]
+    valid_peers = [peer for peer in peers if peer in unique_items]
+    color_discrete_map = {item: color for item, color in zip(valid_peers, colors)}
+
+    fig = go.Figure(layout=dict(template='plotly'))
     fig = px.line(df_melted, x="Year", y="Value", color="Item", markers=True,
-                  color_discrete_map={peers[0]: "blue", peers[1]: "red", peers[2]: "green",
-                                      peers[3]: "goldenrod", peers[4]: "purple", peers[5]: "cyan"})
+                  color_discrete_map=color_discrete_map)
+
     fig.update_layout(
         xaxis_title="Year",
         yaxis_title="Value",
@@ -282,10 +290,17 @@ def create_chart2(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1):
     df_melted['Year'] = pd.to_datetime(df_melted['Year'], format='%Y')
     df_melted['Value'] = df_melted['Value'].astype(float)  # Ensure Value is a float
     df_melted = df_melted.sort_values(by=['Year', 'Value'])
+    df_melted = df_melted.reset_index(drop=True)
 
+    unique_items = df_melted['Item'].unique()
+    colors = ["blue", "red", "green", "goldenrod", "purple", "cyan"]
+    valid_peers = [peer for peer in peers if peer in unique_items]
+    color_discrete_map = {item: color for item, color in zip(valid_peers, colors)}
+
+    fig = go.Figure(layout=dict(template='plotly'))
     fig = px.line(df_melted, x="Year", y="Value", color="Item", markers=True,
-                  color_discrete_map={peers[0]: "blue", peers[1]: "red", peers[2]: "green",
-                                      peers[3]: "goldenrod", peers[4]: "purple", peers[5]: "cyan"})
+                  color_discrete_map=color_discrete_map)
+
     fig.update_layout(
         xaxis_title="Year",
         yaxis_title="Value",
@@ -295,6 +310,7 @@ def create_chart2(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1):
         paper_bgcolor = 'white',  # Set plot area background color
         font_color = 'black',  # Set text color
     )
+
     return fig
 
 
@@ -331,10 +347,17 @@ def create_chart3(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1):
     df_melted['Year'] = pd.to_datetime(df_melted['Year'], format='%Y')
     df_melted['Value'] = df_melted['Value'].astype(float)  # Ensure Value is a float
     df_melted = df_melted.sort_values(by=['Year', 'Value'])
+    df_melted = df_melted.reset_index(drop=True)
 
+    unique_items = df_melted['Item'].unique()
+    colors = ["blue", "red", "green", "goldenrod", "purple", "cyan"]
+    valid_peers = [peer for peer in peers if peer in unique_items]
+    color_discrete_map = {item: color for item, color in zip(valid_peers, colors)}
+
+    fig = go.Figure(layout=dict(template='plotly'))
     fig = px.line(df_melted, x="Year", y="Value", color="Item", markers=True,
-                  color_discrete_map={peers[0]: "blue", peers[1]: "red", peers[2]: "green",
-                                      peers[3]: "goldenrod", peers[4]: "purple", peers[5]: "cyan"})
+                  color_discrete_map=color_discrete_map)
+
     fig.update_layout(
         xaxis_title="Year",
         yaxis_title="Value",
@@ -344,6 +367,7 @@ def create_chart3(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1):
         paper_bgcolor = 'white',  # Set plot area background color
         font_color = 'black',  # Set text color
     )
+
     return fig
 
 
@@ -380,10 +404,17 @@ def create_chart4(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1):
     df_melted['Year'] = pd.to_datetime(df_melted['Year'], format='%Y')
     df_melted['Value'] = df_melted['Value'].astype(float)  # Ensure Value is a float
     df_melted = df_melted.sort_values(by=['Year', 'Value'])
+    df_melted = df_melted.reset_index(drop=True)
 
+    unique_items = df_melted['Item'].unique()
+    colors = ["blue", "red", "green", "goldenrod", "purple", "cyan"]
+    valid_peers = [peer for peer in peers if peer in unique_items]
+    color_discrete_map = {item: color for item, color in zip(valid_peers, colors)}
+
+    fig = go.Figure(layout=dict(template='plotly'))
     fig = px.line(df_melted, x="Year", y="Value", color="Item", markers=True,
-                  color_discrete_map={peers[0]: "blue", peers[1]: "red", peers[2]: "green",
-                                      peers[3]: "goldenrod", peers[4]: "purple", peers[5]: "cyan"})
+                  color_discrete_map=color_discrete_map)
+
     fig.update_layout(
         xaxis_title="Year",
         yaxis_title="Value",
@@ -393,6 +424,7 @@ def create_chart4(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1):
         paper_bgcolor = 'white',  # Set plot area background color
         font_color = 'black',  # Set text color
     )
+
     return fig
 
 

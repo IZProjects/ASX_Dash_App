@@ -1,5 +1,5 @@
 import dash
-from dash import html, Input, Output, callback, dash_table, clientside_callback
+from dash import html, dcc, Input, Output, callback, dash_table, clientside_callback
 import dash_bootstrap_components as dbc
 import pandas as pd
 import dash_mantine_components as dmc
@@ -113,19 +113,17 @@ layout = dbc.Spinner(dbc.Container([
     ], style={'margin-bottom': '10px'}),
     dbc.Row(html.Hr()),
 
-    dbc.Row([dbc.Col(button_group1, width=10),
-             dbc.Col(button_group2, width=2)], style={'margin-bottom': '20px'}),
+    dbc.Stack([button_group1,button_group2],
+              direction="horizontal",gap=3,className="justify-content-between",style={'margin-bottom': '20px'}),
 
-    dbc.Row([dbc.Card([dbc.CardHeader(dbc.Row([dbc.Col(html.H4(id='statement_name'), width=4),
-                                               dbc.Col(button_group3, width=3),
-                                               dbc.Col(button_group4, width=4),
-                                               dbc.Col(export_btn, width=1)])),
-                       dbc.CardBody([dbc.Row([dbc.Col(id='table-container', width=12)], style={'margin-bottom': '40px'}),
-                                    dbc.Row([dbc.Col(width=11, id='sup_title'),
-                                             dbc.Col(export_btn2, width=1, id='sup_title_row')]),
-                                    dbc.Row([dbc.Col(id='table-container2', width=12)], id='table2_row')]
+    dbc.Row([dbc.Card([dbc.CardHeader(dbc.Stack([html.H4(id='statement_name'), button_group3, button_group4, export_btn],
+                                                direction="horizontal", gap=3, className="justify-content-between")),
+                       dbc.CardBody([dbc.Row(id='table-container', style={'margin-bottom': '40px'}),
+                                    dbc.Stack([html.Div(id='sup_title'), html.Div(export_btn2, id='sup_title_row')],direction="horizontal", gap=3, className="justify-content-between"),
+                                    dbc.Row(id='table2_row')]
                                     )])])
 ]),color="primary",delay_hide=10,delay_show=15,spinner_style={"position":"absolute", "top":"20%"})
+
 
 
 @callback(
@@ -280,7 +278,7 @@ clientside_callback(
 ##### sup table
 
 @callback(
-    [Output(component_id='table-container2', component_property='children'),
+    [Output(component_id='table2_row', component_property='children'),
      Output(component_id='sup_title', component_property='style'),
      Output(component_id='sup_title_row', component_property='style'),
      Output(component_id='table2_row', component_property='style')],
