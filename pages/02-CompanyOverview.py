@@ -1,5 +1,5 @@
 import dash
-from dash import dcc, html, Input, Output, callback, clientside_callback
+from dash import dcc, html, Input, Output, State, callback, clientside_callback
 import dash_bootstrap_components as dbc
 import plotly.express as px
 import plotly.graph_objects as go
@@ -91,6 +91,14 @@ layout = dbc.Spinner(dbc.Container([
     dcc.Store(id="dict_monthly", storage_type='session', data={}),
     dcc.Store(id="announcementsTBLStore", storage_type='session', data={}),
 
+    dmc.Alert(
+        "Sorry! Price data is not available for this stock  :(",
+        title="Error!",
+        id="alert-realtimePrice",
+        color="red",
+        withCloseButton=True,
+    ),
+
     dbc.Row([
         dbc.Col([dbc.Row(html.H2(id='stock_name')),
                  dbc.Row(html.Span([
@@ -144,42 +152,39 @@ layout = dbc.Spinner(dbc.Container([
 
     dbc.Row([dbc.Card(dbc.CardBody([dmc.Text("About the Company", fw=700, size='xl'),
                                     html.P(id='description'), dbc.Row(id='peter_lynch')]))], style={'margin-bottom': '25px'}),
-    dbc.Row(dmc.Text("Announcements", fw=700, size='xl'), style={'margin-bottom': '3px', 'margin-top': '10px'}),
-    dbc.Row(html.Small("*Ctrl-Click to open link in new tab")),
-    dbc.Row([
-        dbc.Table(id='stockAnnoucementsTBL', style={'margin-bottom': '-10px'}),
-        dbc.Pagination(id="pagination_stockAnnouncement", max_value=5)
-    ])
+
 ]),color="primary",delay_hide=10,delay_show=15,spinner_style={"position":"absolute", "top":"20%"})
 
 @callback(
     [Output("stock_price", "children"),
     Output("price_change", "children"),
-    Output("price_change_row", "style")],
+    Output("price_change_row", "style"),
+     Output("alert-realtimePrice", "hide")],
     Input("ticker", "data"),
 )
 def get_prices(ticker):
     if ticker is None:
         ticker = "TPG_AU"
+    try:
+        code = ticker.replace('_', '.')
+        query = f"SELECT * FROM real_time WHERE code = '{code}'"
+        df = get_df_query(query)
 
-    code = ticker.replace('_', '.')
-    query = f"SELECT * FROM real_time WHERE code = '{code}'"
-    df = get_df_query(query)
-
-
-    price = '$' + str(df.at[0, 'close'])
-    change = df.at[0, 'change']
-    change_p = df.at[0, 'change_p']
-    if change == 'NA':
-        change_line = 'NA'
-        style = {'color': 'black'}
-    elif float(change) > 0:
-        change_line = '+'+str(change)+' (+'+ str(round(float(change_p), 2))+'%)'
-        style = {'color': 'green'}
-    else:
-        change_line = str(change) + ' (' + str(round(float(change_p), 2)) + '%)'
-        style = {'color': 'red'}
-    return price, change_line, style
+        price = '$' + str(df.at[0, 'close'])
+        change = df.at[0, 'change']
+        change_p = df.at[0, 'change_p']
+        if change == 'NA':
+            change_line = 'NA'
+            style = {'color': 'black'}
+        elif float(change) > 0:
+            change_line = '+'+str(change)+' (+'+ str(round(float(change_p), 2))+'%)'
+            style = {'color': 'green'}
+        else:
+            change_line = str(change) + ' (' + str(round(float(change_p), 2)) + '%)'
+            style = {'color': 'red'}
+        return price, change_line, style, True
+    except:
+        return '', '', {}, False
 
 @callback(
     [Output("table1", "children"),
@@ -268,8 +273,8 @@ def print_tags(metadata,ticker):
 
 @callback(
     Output("collapse", "is_open"),
-    [Input("collapse-button", "n_clicks")],
-    [Input("collapse", "is_open")],
+    [Input("collapse-button", "n_clicks"),
+     Input("collapse", "is_open")],
 )
 def toggle_collapse(n, is_open):
     if n:
@@ -280,12 +285,12 @@ def toggle_collapse(n, is_open):
     [Output(component_id='dict_daily', component_property='data'),
      Output(component_id='dict_weekly', component_property='data'),
      Output(component_id='dict_monthly', component_property='data')],
-    Input("ticker", "data")
+    Input("ticker", "data"),
+
 )
 def sql_get_prices(ticker):
     if ticker is None:
         ticker = "TPG_AU"
-
     name = ticker+'_daily'
     df_daily = get_df_tblName(name)
     dict_daily = df_daily.to_dict()
@@ -295,13 +300,16 @@ def sql_get_prices(ticker):
     name = ticker+'_monthly'
     df_monthly = get_df_tblName(name)
     dict_monthly = df_monthly.to_dict()
+
     return dict_daily, dict_weekly, dict_monthly
+
+
 
 @callback(
     [Output(component_id='price_chart1', component_property='figure'),
      Output(component_id='volume_chart1', component_property='figure'),
      Output(component_id='period_return', component_property='children'),
-     Output(component_id='period_return', component_property='style'),],
+     Output(component_id='period_return', component_property='style')],
     [Input("dict_daily", "data"),
      Input("dict_weekly", "data"),
      Input("dict_monthly", "data"),
@@ -327,96 +335,73 @@ def update_graph(dict_daily,dict_weekly,dict_monthly, value1, value2):
     else:
         filtered_df = df_monthly
 
-
     filtered_df = filtered_df.reset_index()
-    opening_price = filtered_df.loc[0, 'open']
-    closing_price = filtered_df.loc[filtered_df.index[-1], 'close']
-    change_pct = ((closing_price-opening_price)/opening_price)*100
 
-    if change_pct < 0:
-        change_style = {'display': 'inline', 'color': 'red'}
-    else:
-        change_style = {'display': 'inline', 'color': 'green'}
+    try:
+        opening_price = filtered_df.loc[0, 'open']
+        closing_price = filtered_df.loc[filtered_df.index[-1], 'close']
+        change_pct = ((closing_price-opening_price)/opening_price)*100
 
-    change_pct = str(round(change_pct, 2)) + ' %'
+        if change_pct < 0:
+            change_style = {'display': 'inline', 'color': 'red'}
+        else:
+            change_style = {'display': 'inline', 'color': 'green'}
 
-    if value2=='line':
-        fig1 = px.line(filtered_df, x='date', y='close', markers=False, color_discrete_sequence=['gold'])
-    elif value2=='candle':
-        fig1 = go.Figure(data=[go.Candlestick(x=filtered_df['date'],
-                                              open=filtered_df['open'],
-                                              high=filtered_df['high'],
-                                              low=filtered_df['low'],
-                                              close=filtered_df['close'],
-                                              showlegend=False)]
-                         )
-    else:
-        fig1 = px.line(filtered_df, x='date', y='close', markers=False, color_discrete_sequence=['gold'])
+        change_pct = str(round(change_pct, 2)) + ' %'
 
-    # customise fig
-    fig1.update_layout(
-        plot_bgcolor='white',  # Set background color
-        paper_bgcolor='white',  # Set plot area background color
-        font_color='black',  # Set text color
-        title='',  # Set title
-        xaxis=dict(title=''),  # Set X-axis title and grid color
-        yaxis=dict(title='', gridcolor='lightgray'),  # Set Y-axis title and grid color
-        margin=dict(l=40, r=40, t=40, b=40),  # Add margin
-        xaxis_ticks='outside',  # Place X-axis ticks outside
-        xaxis_tickcolor='lightgray',  # Set X-axis tick color
-        yaxis_ticks='outside',  # Place Y-axis ticks outside
-        yaxis_tickcolor='lightgray',  # Set Y-axis tick color
-        xaxis_rangeslider_visible=False
-    )
+        if value2=='line':
+            fig1 = px.line(filtered_df, x='date', y='close', markers=False, color_discrete_sequence=['gold'])
+        elif value2=='candle':
+            fig1 = go.Figure(data=[go.Candlestick(x=filtered_df['date'],
+                                                  open=filtered_df['open'],
+                                                  high=filtered_df['high'],
+                                                  low=filtered_df['low'],
+                                                  close=filtered_df['close'],
+                                                  showlegend=False)]
+                             )
+        else:
+            fig1 = px.line(filtered_df, x='date', y='close', markers=False, color_discrete_sequence=['gold'])
 
-    fig2 = px.bar(filtered_df, x='date', y='volume', color_discrete_sequence=['gold'])
+        # customise fig
+        fig1.update_layout(
+            plot_bgcolor='white',  # Set background color
+            paper_bgcolor='white',  # Set plot area background color
+            font_color='black',  # Set text color
+            title='',  # Set title
+            xaxis=dict(title=''),  # Set X-axis title and grid color
+            yaxis=dict(title='', gridcolor='lightgray'),  # Set Y-axis title and grid color
+            margin=dict(l=40, r=40, t=40, b=40),  # Add margin
+            xaxis_ticks='outside',  # Place X-axis ticks outside
+            xaxis_tickcolor='lightgray',  # Set X-axis tick color
+            yaxis_ticks='outside',  # Place Y-axis ticks outside
+            yaxis_tickcolor='lightgray',  # Set Y-axis tick color
+            xaxis_rangeslider_visible=False
+        )
 
-    fig2.update_layout(
-        plot_bgcolor='white',  # Set background color
-        paper_bgcolor='white',  # Set plot area background color
-        font_color='black',  # Set text color
-        title=None,  # Set title
-        xaxis=dict(title=''),  # Set X-axis title and grid color
-        yaxis=dict(title='', gridcolor='lightgray'),  # Set Y-axis title and grid color
-        margin=dict(l=40, r=40, t=40, b=40),  # Add margin
-        xaxis_ticks='outside',  # Place X-axis ticks outside
-        xaxis_tickcolor='lightgray',  # Set X-axis tick color
-        yaxis_ticks='outside',  # Place Y-axis ticks outside
-        yaxis_tickcolor='lightgray',  # Set Y-axis tick color
-    )
+        fig2 = px.bar(filtered_df, x='date', y='volume', color_discrete_sequence=['gold'])
 
-    return fig1, fig2, change_pct, change_style
+        fig2.update_layout(
+            plot_bgcolor='white',  # Set background color
+            paper_bgcolor='white',  # Set plot area background color
+            font_color='black',  # Set text color
+            title=None,  # Set title
+            xaxis=dict(title=''),  # Set X-axis title and grid color
+            yaxis=dict(title='', gridcolor='lightgray'),  # Set Y-axis title and grid color
+            margin=dict(l=40, r=40, t=40, b=40),  # Add margin
+            xaxis_ticks='outside',  # Place X-axis ticks outside
+            xaxis_tickcolor='lightgray',  # Set X-axis tick color
+            yaxis_ticks='outside',  # Place Y-axis ticks outside
+            yaxis_tickcolor='lightgray',  # Set Y-axis tick color
+        )
+        return fig1, fig2, change_pct, change_style
 
+    except:
+        change_pct = ""
+        change_style = {}
+        fig1 = go.Figure()
+        fig2 = go.Figure()
+        return fig1, fig2, change_pct, change_style
 
-@callback(
-    Output('stockAnnoucementsTBL', 'children'),
-    [Input('ticker', 'data'),
-     Input('pagination_stockAnnouncement', 'active_page')]
-)
-def create_announcements_TBL(ticker, page):
-    # convert active_page data to integer and set default value to 1
-    if ticker is None:
-        ticker = "TPG_AU"
-    table_name = ticker + '_announcements'
-    query = f"SELECT * FROM {table_name} LIMIT 80"
-    df_announcements = get_df_query(query)
-    df_announcements['Links'] = df_announcements['Links'].apply(create_link_announcements)
-
-    int_page = 1 if not page else int(page)
-
-    # define filter index range based on active page
-    filter_index_1 = (int_page - 1) * TABLE_SIZE
-    filter_index_2 = (int_page) * TABLE_SIZE
-
-    # get data by filter range based on active page number
-    fitlered_df = df_announcements[filter_index_1:min(filter_index_2,len(df_announcements))]
-    fitlered_df['Document Name'] = fitlered_df['Document Name'].str.upper()
-    fitlered_df['Type'] = fitlered_df['Type'].str.upper()
-
-    # load data to dash bootstrap table component
-    table = dbc.Table.from_dataframe(fitlered_df, bordered=True, hover=True, striped=True)
-
-    return table
 
 @callback(
      Output(component_id='peter_lynch', component_property='children'),

@@ -129,74 +129,84 @@ def get_peer_tbl(ticker):
     if ticker is None:
         ticker = "TPG_AU"
     symbol = ticker[0:-3]
-    query = "SELECT * FROM Peers WHERE Ticker = :ticker;"
-    params = {"ticker": symbol}
-    row = get_cursor(query,params)
 
-    if row:
-        dfs = []
-        dfs_graph_df = []
-        company_list = list(row)
-        for i in range(len(company_list)):
-            try:
-                name = company_list[i] + '_AU_annual_summary'
-                company_df = get_df_tblName(name)
-                company_df.columns = ['Item',company_list[i]]
-                dfs.append(company_df)
-            except:
-                pass
-            try:
-                name = company_list[i] + '_AU_peers'
-                peer_df = get_df_tblName(name)
-                if peer_df.shape[1] > 6:
-                    peer_df = pd.concat([peer_df.iloc[:, 0], peer_df.iloc[:, -5:]], axis=1)
-                dfs_graph_df.append(peer_df.to_dict())
-            except:
-                dfs_graph_df.append({})
-        left = dfs[0]
-        for i in range(1,len(dfs)):
-            left = pd.merge(left, dfs[i], on='Item', how='outer')
-    else:
-        print("No row found with 'AAPL' in the first column.")
+    try:
+        query = "SELECT * FROM Peers WHERE Ticker = :ticker;"
+        params = {"ticker": symbol}
+        row = get_cursor(query,params)
 
-    sorted_columns = [left.columns[0], left.columns[1]] + sorted(left.columns[2:])
-    left = left[sorted_columns]
+        if row:
+            dfs = []
+            dfs_graph_df = []
+            company_list = list(row)
+            for i in range(len(company_list)):
+                try:
+                    name = company_list[i] + '_AU_annual_summary'
+                    company_df = get_df_tblName(name)
+                    company_df.columns = ['Item',company_list[i]]
+                    dfs.append(company_df)
+                except:
+                    pass
+                try:
+                    name = company_list[i] + '_AU_peers'
+                    peer_df = get_df_tblName(name)
+                    if peer_df.shape[1] > 6:
+                        peer_df = pd.concat([peer_df.iloc[:, 0], peer_df.iloc[:, -5:]], axis=1)
+                    dfs_graph_df.append(peer_df.to_dict())
+                except:
+                    dfs_graph_df.append({})
+            left = dfs[0]
+            for i in range(1,len(dfs)):
+                left = pd.merge(left, dfs[i], on='Item', how='outer')
+        else:
+            print("No row found with 'AAPL' in the first column.")
 
-    desired_order = ['Market Cap','EV','P/E','P/BV','EV/FCF','ROE','ROA','ROIC','Gross Margin','Operating Margin',
-                     'Net Income Margin','Revenue Growth (Y/Y)','EBITDA Growth (Y/Y)','Net Income Growth (Y/Y)',
-                     'D/E','Current Ratio','Net Debt','Share Count']
+        sorted_columns = [left.columns[0], left.columns[1]] + sorted(left.columns[2:])
+        left = left[sorted_columns]
 
-    format_units = ['Market Cap','EV','Net Debt','Share Count']
-    format_percentage = ['ROE','ROA','ROIC']
-    format_round = ['P/E','P/BV','EV/FCF','D/E','Current Ratio']
+        desired_order = ['Market Cap','EV','P/E','P/BV','EV/FCF','ROE','ROA','ROIC','Gross Margin','Operating Margin',
+                         'Net Income Margin','Revenue Growth (Y/Y)','EBITDA Growth (Y/Y)','Net Income Growth (Y/Y)',
+                         'D/E','Current Ratio','Net Debt','Share Count']
 
-    left['Item'] = pd.Categorical(left['Item'], categories=desired_order, ordered=True)
-    left = left.sort_values('Item').reset_index(drop=True)
+        format_units = ['Market Cap','EV','Net Debt','Share Count']
+        format_percentage = ['ROE','ROA','ROIC']
+        format_round = ['P/E','P/BV','EV/FCF','D/E','Current Ratio']
 
-    for item in format_units:
-        mask = left['Item'] == item
-        for col in left.columns:
-            if col != 'Item':
-                left.loc[mask, col] = left.loc[mask, col].map(format_number)
+        left['Item'] = pd.Categorical(left['Item'], categories=desired_order, ordered=True)
+        left = left.sort_values('Item').reset_index(drop=True)
 
-    for item in format_round:
-        mask = left['Item'] == item
-        for col in left.columns:
-            if col != 'Item':
-                left.loc[mask, col] = left.loc[mask, col].map(round_to_two_decimal_places)
+        for item in format_units:
+            mask = left['Item'] == item
+            for col in left.columns:
+                if col != 'Item':
+                    left.loc[mask, col] = left.loc[mask, col].map(format_number)
 
-    for item in format_percentage:
-        mask = left['Item'] == item
-        for col in left.columns:
-            if col != 'Item':
-                left.loc[mask, col] = left.loc[mask, col].map(convert_to_percentage)
+        for item in format_round:
+            mask = left['Item'] == item
+            for col in left.columns:
+                if col != 'Item':
+                    left.loc[mask, col] = left.loc[mask, col].map(round_to_two_decimal_places)
+
+        for item in format_percentage:
+            mask = left['Item'] == item
+            for col in left.columns:
+                if col != 'Item':
+                    left.loc[mask, col] = left.loc[mask, col].map(convert_to_percentage)
 
 
-    table = dbc.Table.from_dataframe(left, striped=True, bordered=True, hover=True)
-    companies = left.columns.to_list()
-    companies_shown = companies[1:]
+        table = dbc.Table.from_dataframe(left, striped=True, bordered=True, hover=True)
+        companies = left.columns.to_list()
+        companies_shown = companies[1:]
 
-    return table, dfs_graph_df[0], dfs_graph_df[1], dfs_graph_df[2], dfs_graph_df[3], dfs_graph_df[4], dfs_graph_df[5],company_list,companies_shown
+        return table, dfs_graph_df[0], dfs_graph_df[1], dfs_graph_df[2], dfs_graph_df[3], dfs_graph_df[4], dfs_graph_df[5],company_list,companies_shown
+    except:
+        alert = dmc.Alert(
+            "Sorry! This data is not available.",
+            title="Error!",
+            color="red",
+            withCloseButton=True,
+        ),
+        return alert,{},{},{},{},{},{},[],[]
 
 
 
@@ -213,47 +223,49 @@ def get_peer_tbl(ticker):
      Input('dropdown1', 'value'),]
 )
 def create_chart1(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1):
-    dicts = [target,dict1,dict2,dict3,dict4,dict5]
-    dfs = [pd.DataFrame(d) for d in dicts]
-    dfs_filtered = []
-    for i in range(len(dfs)):
-        df = dfs[i]
-        if not df.empty and dropdown1 in df.iloc[:, 0].values:
-            dff = df[df.iloc[:, 0] == dropdown1]
-            dff = dff.reset_index(drop=True)
-            dff.iloc[0, 0] = peers[i]
-            dff.columns = [col[:4] for col in dff.columns]
-            dfs_filtered.append(dff)
+    try:
+        dicts = [target,dict1,dict2,dict3,dict4,dict5]
+        dfs = [pd.DataFrame(d) for d in dicts]
+        dfs_filtered = []
+        for i in range(len(dfs)):
+            df = dfs[i]
+            if not df.empty and dropdown1 in df.iloc[:, 0].values:
+                dff = df[df.iloc[:, 0] == dropdown1]
+                dff = dff.reset_index(drop=True)
+                dff.iloc[0, 0] = peers[i]
+                dff.columns = [col[:4] for col in dff.columns]
+                dfs_filtered.append(dff)
 
-    df = pd.concat(dfs_filtered, axis=0, ignore_index=True)
-    df = pd.concat([df.iloc[:, 0], df.reindex(sorted(df.columns[1:], key=int), axis=1)], axis=1)
-    df_melted = df.melt(id_vars="Item", var_name="Year", value_name="Value")
-    df_melted = df_melted.dropna(subset=['Value'])
-    df_melted['Value'] = df_melted['Value'].apply(lambda x: convert_to_float(x) if pd.notnull(x) else None)
-    df_melted['Year'] = pd.to_datetime(df_melted['Year'], format='%Y')
-    df_melted['Value'] = df_melted['Value'].astype(float)  # Ensure Value is a float
-    df_melted = df_melted.sort_values(by=['Year', 'Value'])
-    df_melted = df_melted.reset_index(drop=True)
+        df = pd.concat(dfs_filtered, axis=0, ignore_index=True)
+        df = pd.concat([df.iloc[:, 0], df.reindex(sorted(df.columns[1:], key=int), axis=1)], axis=1)
+        df_melted = df.melt(id_vars="Item", var_name="Year", value_name="Value")
+        df_melted = df_melted.dropna(subset=['Value'])
+        df_melted['Value'] = df_melted['Value'].apply(lambda x: convert_to_float(x) if pd.notnull(x) else None)
+        df_melted['Year'] = pd.to_datetime(df_melted['Year'], format='%Y')
+        df_melted['Value'] = df_melted['Value'].astype(float)  # Ensure Value is a float
+        df_melted = df_melted.sort_values(by=['Year', 'Value'])
+        df_melted = df_melted.reset_index(drop=True)
 
-    unique_items = df_melted['Item'].unique()
-    colors = ["blue", "red", "green", "goldenrod", "purple", "cyan"]
-    valid_peers = [peer for peer in peers if peer in unique_items]
-    color_discrete_map = {item: color for item, color in zip(valid_peers, colors)}
+        unique_items = df_melted['Item'].unique()
+        colors = ["blue", "red", "green", "goldenrod", "purple", "cyan"]
+        valid_peers = [peer for peer in peers if peer in unique_items]
+        color_discrete_map = {item: color for item, color in zip(valid_peers, colors)}
 
-    fig = go.Figure(layout=dict(template='plotly'))
-    fig = px.line(df_melted, x="Year", y="Value", color="Item", markers=True,
-                  color_discrete_map=color_discrete_map)
+        fig = go.Figure(layout=dict(template='plotly'))
+        fig = px.line(df_melted, x="Year", y="Value", color="Item", markers=True,
+                      color_discrete_map=color_discrete_map)
 
-    fig.update_layout(
-        xaxis_title="Year",
-        yaxis_title="Value",
-        xaxis=dict(tickformat="%Y", nticks=5),
-        yaxis=dict(title='', gridcolor='lightgray'),
-        plot_bgcolor = 'white',  # Set background color
-        paper_bgcolor = 'white',  # Set plot area background color
-        font_color = 'black',  # Set text color
-    )
-
+        fig.update_layout(
+            xaxis_title="Year",
+            yaxis_title="Value",
+            xaxis=dict(tickformat="%Y", nticks=5),
+            yaxis=dict(title='', gridcolor='lightgray'),
+            plot_bgcolor = 'white',  # Set background color
+            paper_bgcolor = 'white',  # Set plot area background color
+            font_color = 'black',  # Set text color
+        )
+    except:
+        fig = go.Figure()
     return fig
 
 
@@ -270,47 +282,49 @@ def create_chart1(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1):
      Input('dropdown2', 'value'),]
 )
 def create_chart2(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1):
-    dicts = [target,dict1,dict2,dict3,dict4,dict5]
-    dfs = [pd.DataFrame(d) for d in dicts]
-    dfs_filtered = []
-    for i in range(len(dfs)):
-        df = dfs[i]
-        if not df.empty and dropdown1 in df.iloc[:, 0].values:
-            dff = df[df.iloc[:, 0] == dropdown1]
-            dff = dff.reset_index(drop=True)
-            dff.iloc[0, 0] = peers[i]
-            dff.columns = [col[:4] for col in dff.columns]
-            dfs_filtered.append(dff)
+    try:
+        dicts = [target,dict1,dict2,dict3,dict4,dict5]
+        dfs = [pd.DataFrame(d) for d in dicts]
+        dfs_filtered = []
+        for i in range(len(dfs)):
+            df = dfs[i]
+            if not df.empty and dropdown1 in df.iloc[:, 0].values:
+                dff = df[df.iloc[:, 0] == dropdown1]
+                dff = dff.reset_index(drop=True)
+                dff.iloc[0, 0] = peers[i]
+                dff.columns = [col[:4] for col in dff.columns]
+                dfs_filtered.append(dff)
 
-    df = pd.concat(dfs_filtered, axis=0, ignore_index=True)
-    df = pd.concat([df.iloc[:, 0], df.reindex(sorted(df.columns[1:], key=int), axis=1)], axis=1)
-    df_melted = df.melt(id_vars="Item", var_name="Year", value_name="Value")
-    df_melted = df_melted.dropna(subset=['Value'])
-    df_melted['Value'] = df_melted['Value'].apply(lambda x: convert_to_float(x) if pd.notnull(x) else None)
-    df_melted['Year'] = pd.to_datetime(df_melted['Year'], format='%Y')
-    df_melted['Value'] = df_melted['Value'].astype(float)  # Ensure Value is a float
-    df_melted = df_melted.sort_values(by=['Year', 'Value'])
-    df_melted = df_melted.reset_index(drop=True)
+        df = pd.concat(dfs_filtered, axis=0, ignore_index=True)
+        df = pd.concat([df.iloc[:, 0], df.reindex(sorted(df.columns[1:], key=int), axis=1)], axis=1)
+        df_melted = df.melt(id_vars="Item", var_name="Year", value_name="Value")
+        df_melted = df_melted.dropna(subset=['Value'])
+        df_melted['Value'] = df_melted['Value'].apply(lambda x: convert_to_float(x) if pd.notnull(x) else None)
+        df_melted['Year'] = pd.to_datetime(df_melted['Year'], format='%Y')
+        df_melted['Value'] = df_melted['Value'].astype(float)  # Ensure Value is a float
+        df_melted = df_melted.sort_values(by=['Year', 'Value'])
+        df_melted = df_melted.reset_index(drop=True)
 
-    unique_items = df_melted['Item'].unique()
-    colors = ["blue", "red", "green", "goldenrod", "purple", "cyan"]
-    valid_peers = [peer for peer in peers if peer in unique_items]
-    color_discrete_map = {item: color for item, color in zip(valid_peers, colors)}
+        unique_items = df_melted['Item'].unique()
+        colors = ["blue", "red", "green", "goldenrod", "purple", "cyan"]
+        valid_peers = [peer for peer in peers if peer in unique_items]
+        color_discrete_map = {item: color for item, color in zip(valid_peers, colors)}
 
-    fig = go.Figure(layout=dict(template='plotly'))
-    fig = px.line(df_melted, x="Year", y="Value", color="Item", markers=True,
-                  color_discrete_map=color_discrete_map)
+        fig = go.Figure(layout=dict(template='plotly'))
+        fig = px.line(df_melted, x="Year", y="Value", color="Item", markers=True,
+                      color_discrete_map=color_discrete_map)
 
-    fig.update_layout(
-        xaxis_title="Year",
-        yaxis_title="Value",
-        xaxis=dict(tickformat="%Y", nticks=5),
-        yaxis=dict(title='', gridcolor='lightgray'),
-        plot_bgcolor = 'white',  # Set background color
-        paper_bgcolor = 'white',  # Set plot area background color
-        font_color = 'black',  # Set text color
-    )
-
+        fig.update_layout(
+            xaxis_title="Year",
+            yaxis_title="Value",
+            xaxis=dict(tickformat="%Y", nticks=5),
+            yaxis=dict(title='', gridcolor='lightgray'),
+            plot_bgcolor = 'white',  # Set background color
+            paper_bgcolor = 'white',  # Set plot area background color
+            font_color = 'black',  # Set text color
+        )
+    except:
+        fig = go.Figure()
     return fig
 
 
@@ -327,47 +341,49 @@ def create_chart2(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1):
      Input('dropdown3', 'value'),]
 )
 def create_chart3(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1):
-    dicts = [target,dict1,dict2,dict3,dict4,dict5]
-    dfs = [pd.DataFrame(d) for d in dicts]
-    dfs_filtered = []
-    for i in range(len(dfs)):
-        df = dfs[i]
-        if not df.empty and dropdown1 in df.iloc[:, 0].values:
-            dff = df[df.iloc[:, 0] == dropdown1]
-            dff = dff.reset_index(drop=True)
-            dff.iloc[0, 0] = peers[i]
-            dff.columns = [col[:4] for col in dff.columns]
-            dfs_filtered.append(dff)
+    try:
+        dicts = [target,dict1,dict2,dict3,dict4,dict5]
+        dfs = [pd.DataFrame(d) for d in dicts]
+        dfs_filtered = []
+        for i in range(len(dfs)):
+            df = dfs[i]
+            if not df.empty and dropdown1 in df.iloc[:, 0].values:
+                dff = df[df.iloc[:, 0] == dropdown1]
+                dff = dff.reset_index(drop=True)
+                dff.iloc[0, 0] = peers[i]
+                dff.columns = [col[:4] for col in dff.columns]
+                dfs_filtered.append(dff)
 
-    df = pd.concat(dfs_filtered, axis=0, ignore_index=True)
-    df = pd.concat([df.iloc[:, 0], df.reindex(sorted(df.columns[1:], key=int), axis=1)], axis=1)
-    df_melted = df.melt(id_vars="Item", var_name="Year", value_name="Value")
-    df_melted = df_melted.dropna(subset=['Value'])
-    df_melted['Value'] = df_melted['Value'].apply(lambda x: convert_to_float(x) if pd.notnull(x) else None)
-    df_melted['Year'] = pd.to_datetime(df_melted['Year'], format='%Y')
-    df_melted['Value'] = df_melted['Value'].astype(float)  # Ensure Value is a float
-    df_melted = df_melted.sort_values(by=['Year', 'Value'])
-    df_melted = df_melted.reset_index(drop=True)
+        df = pd.concat(dfs_filtered, axis=0, ignore_index=True)
+        df = pd.concat([df.iloc[:, 0], df.reindex(sorted(df.columns[1:], key=int), axis=1)], axis=1)
+        df_melted = df.melt(id_vars="Item", var_name="Year", value_name="Value")
+        df_melted = df_melted.dropna(subset=['Value'])
+        df_melted['Value'] = df_melted['Value'].apply(lambda x: convert_to_float(x) if pd.notnull(x) else None)
+        df_melted['Year'] = pd.to_datetime(df_melted['Year'], format='%Y')
+        df_melted['Value'] = df_melted['Value'].astype(float)  # Ensure Value is a float
+        df_melted = df_melted.sort_values(by=['Year', 'Value'])
+        df_melted = df_melted.reset_index(drop=True)
 
-    unique_items = df_melted['Item'].unique()
-    colors = ["blue", "red", "green", "goldenrod", "purple", "cyan"]
-    valid_peers = [peer for peer in peers if peer in unique_items]
-    color_discrete_map = {item: color for item, color in zip(valid_peers, colors)}
+        unique_items = df_melted['Item'].unique()
+        colors = ["blue", "red", "green", "goldenrod", "purple", "cyan"]
+        valid_peers = [peer for peer in peers if peer in unique_items]
+        color_discrete_map = {item: color for item, color in zip(valid_peers, colors)}
 
-    fig = go.Figure(layout=dict(template='plotly'))
-    fig = px.line(df_melted, x="Year", y="Value", color="Item", markers=True,
-                  color_discrete_map=color_discrete_map)
+        fig = go.Figure(layout=dict(template='plotly'))
+        fig = px.line(df_melted, x="Year", y="Value", color="Item", markers=True,
+                      color_discrete_map=color_discrete_map)
 
-    fig.update_layout(
-        xaxis_title="Year",
-        yaxis_title="Value",
-        xaxis=dict(tickformat="%Y", nticks=5),
-        yaxis=dict(title='', gridcolor='lightgray'),
-        plot_bgcolor = 'white',  # Set background color
-        paper_bgcolor = 'white',  # Set plot area background color
-        font_color = 'black',  # Set text color
-    )
-
+        fig.update_layout(
+            xaxis_title="Year",
+            yaxis_title="Value",
+            xaxis=dict(tickformat="%Y", nticks=5),
+            yaxis=dict(title='', gridcolor='lightgray'),
+            plot_bgcolor = 'white',  # Set background color
+            paper_bgcolor = 'white',  # Set plot area background color
+            font_color = 'black',  # Set text color
+        )
+    except:
+        fig = go.Figure()
     return fig
 
 
@@ -384,47 +400,49 @@ def create_chart3(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1):
      Input('dropdown4', 'value'),]
 )
 def create_chart4(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1):
-    dicts = [target,dict1,dict2,dict3,dict4,dict5]
-    dfs = [pd.DataFrame(d) for d in dicts]
-    dfs_filtered = []
-    for i in range(len(dfs)):
-        df = dfs[i]
-        if not df.empty and dropdown1 in df.iloc[:, 0].values:
-            dff = df[df.iloc[:, 0] == dropdown1]
-            dff = dff.reset_index(drop=True)
-            dff.iloc[0, 0] = peers[i]
-            dff.columns = [col[:4] for col in dff.columns]
-            dfs_filtered.append(dff)
+    try:
+        dicts = [target,dict1,dict2,dict3,dict4,dict5]
+        dfs = [pd.DataFrame(d) for d in dicts]
+        dfs_filtered = []
+        for i in range(len(dfs)):
+            df = dfs[i]
+            if not df.empty and dropdown1 in df.iloc[:, 0].values:
+                dff = df[df.iloc[:, 0] == dropdown1]
+                dff = dff.reset_index(drop=True)
+                dff.iloc[0, 0] = peers[i]
+                dff.columns = [col[:4] for col in dff.columns]
+                dfs_filtered.append(dff)
 
-    df = pd.concat(dfs_filtered, axis=0, ignore_index=True)
-    df = pd.concat([df.iloc[:, 0], df.reindex(sorted(df.columns[1:], key=int), axis=1)], axis=1)
-    df_melted = df.melt(id_vars="Item", var_name="Year", value_name="Value")
-    df_melted = df_melted.dropna(subset=['Value'])
-    df_melted['Value'] = df_melted['Value'].apply(lambda x: convert_to_float(x) if pd.notnull(x) else None)
-    df_melted['Year'] = pd.to_datetime(df_melted['Year'], format='%Y')
-    df_melted['Value'] = df_melted['Value'].astype(float)  # Ensure Value is a float
-    df_melted = df_melted.sort_values(by=['Year', 'Value'])
-    df_melted = df_melted.reset_index(drop=True)
+        df = pd.concat(dfs_filtered, axis=0, ignore_index=True)
+        df = pd.concat([df.iloc[:, 0], df.reindex(sorted(df.columns[1:], key=int), axis=1)], axis=1)
+        df_melted = df.melt(id_vars="Item", var_name="Year", value_name="Value")
+        df_melted = df_melted.dropna(subset=['Value'])
+        df_melted['Value'] = df_melted['Value'].apply(lambda x: convert_to_float(x) if pd.notnull(x) else None)
+        df_melted['Year'] = pd.to_datetime(df_melted['Year'], format='%Y')
+        df_melted['Value'] = df_melted['Value'].astype(float)  # Ensure Value is a float
+        df_melted = df_melted.sort_values(by=['Year', 'Value'])
+        df_melted = df_melted.reset_index(drop=True)
 
-    unique_items = df_melted['Item'].unique()
-    colors = ["blue", "red", "green", "goldenrod", "purple", "cyan"]
-    valid_peers = [peer for peer in peers if peer in unique_items]
-    color_discrete_map = {item: color for item, color in zip(valid_peers, colors)}
+        unique_items = df_melted['Item'].unique()
+        colors = ["blue", "red", "green", "goldenrod", "purple", "cyan"]
+        valid_peers = [peer for peer in peers if peer in unique_items]
+        color_discrete_map = {item: color for item, color in zip(valid_peers, colors)}
 
-    fig = go.Figure(layout=dict(template='plotly'))
-    fig = px.line(df_melted, x="Year", y="Value", color="Item", markers=True,
-                  color_discrete_map=color_discrete_map)
+        fig = go.Figure(layout=dict(template='plotly'))
+        fig = px.line(df_melted, x="Year", y="Value", color="Item", markers=True,
+                      color_discrete_map=color_discrete_map)
 
-    fig.update_layout(
-        xaxis_title="Year",
-        yaxis_title="Value",
-        xaxis=dict(tickformat="%Y", nticks=5),
-        yaxis=dict(title='', gridcolor='lightgray'),
-        plot_bgcolor = 'white',  # Set background color
-        paper_bgcolor = 'white',  # Set plot area background color
-        font_color = 'black',  # Set text color
-    )
-
+        fig.update_layout(
+            xaxis_title="Year",
+            yaxis_title="Value",
+            xaxis=dict(tickformat="%Y", nticks=5),
+            yaxis=dict(title='', gridcolor='lightgray'),
+            plot_bgcolor = 'white',  # Set background color
+            paper_bgcolor = 'white',  # Set plot area background color
+            font_color = 'black',  # Set text color
+        )
+    except:
+        fig = go.Figure()
     return fig
 
 
@@ -434,13 +452,22 @@ def create_chart4(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1):
       Input('ticker', 'data')]
 )
 def create_desc_tbl(peers,ticker):
-    peers_str = ', '.join(f"'{peer}'" for peer in peers)
-    query = f"SELECT symbol, name, description FROM metadataTBL WHERE symbol IN ({peers_str})"
-    df = get_df_query(query)
-    df = df.drop_duplicates(subset='symbol')
-    first_row = df[df['symbol'] == ticker[0:-3]]
-    other_rows = df[df['symbol'] != ticker[0:-3]].sort_values(by='symbol')
-    df = pd.concat([first_row, other_rows], ignore_index=True)
-    df.columns = [col.capitalize() for col in df.columns]
-    table = dbc.Table.from_dataframe(df)
-    return table
+    try:
+        peers_str = ', '.join(f"'{peer}'" for peer in peers)
+        query = f"SELECT symbol, name, description FROM metadataTBL WHERE symbol IN ({peers_str})"
+        df = get_df_query(query)
+        df = df.drop_duplicates(subset='symbol')
+        first_row = df[df['symbol'] == ticker[0:-3]]
+        other_rows = df[df['symbol'] != ticker[0:-3]].sort_values(by='symbol')
+        df = pd.concat([first_row, other_rows], ignore_index=True)
+        df.columns = [col.capitalize() for col in df.columns]
+        table = dbc.Table.from_dataframe(df)
+        return table
+    except:
+        alert = dmc.Alert(
+            "Sorry! This data is not available.",
+            title="Error!",
+            color="red",
+            withCloseButton=True,
+        ),
+        return alert

@@ -65,7 +65,13 @@ def get_segmentDescriptions(ticker):
 
         return formatted_lines
     except:
-        return html.H5("No segement information avaliable at the moment", style={'margin-top': '40px'})
+        alert = dmc.Alert(
+            "Sorry! This data is not available.",
+            title="Error!",
+            color="red",
+            withCloseButton=True,
+        ),
+        return alert
 
 
 @callback(

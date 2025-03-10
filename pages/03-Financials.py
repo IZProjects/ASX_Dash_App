@@ -99,6 +99,7 @@ export_btn2 = dmc.Button("Export", id='exportBtn2', color="gray")
 
 # Layout
 layout = dbc.Spinner(dbc.Container([
+
     dbc.Row([
         dbc.Col([dbc.Row(html.H2(id='stock_name')),
                  dbc.Row(html.Span([
@@ -244,9 +245,9 @@ def create_table(statement, period, units, direction, ticker):
                           'textAlign': 'center'},
             style_header_conditional=firstColHeader_style,
             style_data_conditional=body_style,
-            style_table = {'overflowX': 'auto', 'height': '800px', 'overflowY': 'auto','minWidth': '100%','z-index':'0'},
+            style_table = {'overflowX': 'auto', 'overflowY': 'auto','minWidth': '100%','z-index':'0'},
             style_cell={#'height': 'auto',
-                        'minWidth': '120px', 'width': '120px', 'maxWidth': '600px',
+                        'minWidth': '120px', 'maxWidth': '600px',
                         #'whiteSpace': 'normal',
                         'textAlign': 'center'},
             #style_as_list_view=True,
@@ -258,9 +259,15 @@ def create_table(statement, period, units, direction, ticker):
             export_headers = 'display'
             )
 
-        return table,title, html.H4("Supplementary Data")
+        return table,title,html.H4("Supplementary Data")
     except:
-        return '','',''
+        alert = dmc.Alert(
+            "Sorry! This data is not available.",
+            title="Error!",
+            color="red",
+            withCloseButton=True,
+        ),
+        return alert,'','',
 
 
 clientside_callback(
@@ -305,8 +312,10 @@ def create_table(statement, period, units, direction, ticker):
         if supName != 'Other':
             table = ticker+'_'+period+'_'+supName
             df = get_df_tblName(table)
+            if df.empty:
+                df = pd.DataFrame({"Item": ["Sorry! No Data Available"]})
         else:
-            df = pd.DataFrame(columns=['Item'])
+            df = pd.DataFrame({"Item": ["Sorry! No Data Available"]})
 
         if units =='K':
             divider = 1000
@@ -393,9 +402,9 @@ def create_table(statement, period, units, direction, ticker):
                           'textAlign': 'center'},
             style_header_conditional=firstColHeader_style,
             style_data_conditional=body_style,
-            style_table = {'overflowX': 'auto', 'height': '800px', 'overflowY': 'auto','minWidth': '100%','z-index':'0'},
+            style_table = {'overflowX': 'auto', 'overflowY': 'auto','minWidth': '100%','z-index':'0'},
             style_cell={#'height': 'auto',
-                        'minWidth': '120px', 'width': '120px', 'maxWidth': '600px',
+                        'minWidth': '120px', 'maxWidth': '600px',
                         #'whiteSpace': 'normal',
                         'textAlign': 'center'},
             #style_as_list_view=True,
@@ -409,7 +418,13 @@ def create_table(statement, period, units, direction, ticker):
 
         return table, sup_title_style, sup_title_style2, table_style
     except:
-        return '','','',''
+        alert = dmc.Alert(
+            "Sorry! This data is not available.",
+            title="Error!",
+            color="red",
+            withCloseButton=True,
+        ),
+        return alert,'','',''
 
 clientside_callback(
     """

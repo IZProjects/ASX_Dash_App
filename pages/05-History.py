@@ -69,7 +69,13 @@ def get_timeline(long_history, short_history, controls):
     else:
         df = pd.DataFrame.from_dict(short_history)
     if df.empty:
-        return html.H5("No history avaliable at the moment", style={'margin-top': '40px'})
+        alert = dmc.Alert(
+            "Sorry! This data is not available.",
+            title="Error!",
+            color="red",
+            withCloseButton=True,
+        ),
+        return alert
     else:
         df['year'] = df['year'].astype(int)
         df = df.sort_values(by='year', ascending=False)

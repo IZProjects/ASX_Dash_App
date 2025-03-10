@@ -1,6 +1,7 @@
 import dash
 from dash import dcc, html, Input, Output, State, callback, ALL, dash_table
 import dash_bootstrap_components as dbc
+import dash_mantine_components as dmc
 import re
 from mysql_connect_funcs import get_df_query
 
@@ -130,7 +131,6 @@ def generate_checklists(main_list, label):
                         width=4  # Adjust column width as needed
                     )
                 )
-        # Add a label before each row of sublist
         rows.append(dbc.Row(columns, style={'margin-bottom': '10px'}))
     return rows
 
@@ -445,7 +445,6 @@ def print_values(n_clicks, ratio_items, pct_items, singular_items, numeric_items
             conditions = ' '.join(sql_query_conditions)
         else:
             conditions=''
-        #query = "SELECT Item, Name, " + select + " FROM Screener_TBL " + conditions
         query = (
                 "SELECT Screener_TBL1.Item, Screener_TBL2.Name, " + select + " " +
                 "FROM Screener_TBL1 " +
@@ -454,22 +453,29 @@ def print_values(n_clicks, ratio_items, pct_items, singular_items, numeric_items
                 conditions
         )
     except:
-        return html.H4("ERROR: Please check the filters and submit again")
+        alert = dmc.Alert(
+            "Please check the filters and submit again!",
+            title="Error!",
+            color="red",
+            withCloseButton=True,
+        )
+        return alert
 
     if 'None' in query:
-        return html.H4("ERROR: Please check the filters and submit again")
+        alert = dmc.Alert(
+            "Please check the filters and submit again!",
+            title="Error!",
+            color="red",
+            withCloseButton=True,
+        )
+        return alert
 
     else:
-
-        #conn = sqlite3.connect('databases/Financials_DB.db')
-        #df = pd.read_sql_query(query, conn)
-        #conn.close()
         df = get_df_query(query)
         df.columns = df.columns.str.replace('_', ' ')
         df = df.drop_duplicates(subset=["Item"], keep="first")
         df = df.reset_index(drop=True)
         new_df = df.copy()
-        #new_df['Item'] = df['Item'].apply(create_link)
         new_df['Item'] = new_df['Item'].apply(lambda x: f'[{x[0:3]}](/02-companyoverview?data={x})')
         twoDPUpdated = [col for col in twoDP if col in new_df.columns]
         new_df[twoDPUpdated] = new_df[twoDPUpdated].map(lambda x: round(float(x), 2))
@@ -490,9 +496,6 @@ def print_values(n_clicks, ratio_items, pct_items, singular_items, numeric_items
             sort_action='native',
             css=[{'selector': 'p', 'rule': 'margin: 0; text-align: left; padding-left: 5px; padding-right: 5px;'}],
         )
-
-
-        #table = dbc.Table.from_dataframe(new_df, striped=True, bordered=True, hover=True)
         return table
 
 
