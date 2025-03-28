@@ -1,10 +1,10 @@
-from dash import dcc
+from dash import dcc, callback, Input, Output
 import dash_mantine_components as dmc
 from utils.helpers import iconify
 
 burger = dmc.Burger(id="burger-button", size="sm", hiddenFrom="sm", opened=False),
 
-dropdown = dcc.Dropdown(id="my-dynamic-dropdown", placeholder="Search...",)
+dropdown = dcc.Dropdown(id="my-dynamic-dropdown", placeholder="Search...", className='Dropdown-2')
 
 menu = dmc.Menu(
             children=[
@@ -42,4 +42,12 @@ header = dmc.Grid(
     align="center",
 )
 
-
+"""@callback(
+    Output(component_id="my-dynamic-dropdown", component_property='className'),
+     Input("mantine-provider", "forceColorScheme")
+)
+def change_dropdown_color(theme):
+    if theme == "light":
+        return 'dropdown_light'
+    else:
+        return 'dropdown_dark'"""

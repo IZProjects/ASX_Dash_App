@@ -1,5 +1,3 @@
-// ctx = window.dash_clientside.callback_context;
-
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
     clientside: {
         theme_switcher_callback: function (n_clicks) {
@@ -45,52 +43,16 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
                 }
             }
 
-            function applyDropdownStyles(theme) {
-                let dropdowns = document.querySelectorAll('.Select-control');  // Main dropdown
-                let dropdownOptions = document.querySelectorAll('.dash-dropdown'); // Dropdown options menu
-                let dropdownValues = document.querySelectorAll('.Select-value-label'); // Selected value text
-                let dropdownInput = document.querySelectorAll('.Select-input'); // Selected value text
-
-                dropdowns.forEach(dropdown => {
-                    if (theme === 'dark') {
-                        dropdown.style.backgroundColor = '#2C2F33';
-                        dropdown.style.color = '#FFFFFF';
-                        dropdown.style.border = '1px solid #444';
-                    } else {
-                        dropdown.style.backgroundColor = '#FFFFFF';
-                        dropdown.style.color = '#000000';
-                        dropdown.style.border = '1px solid #ccc';
-                    }
-                });
-
-                dropdownOptions.forEach(option => {
-                    option.style.color = theme === 'dark' ? '#000000' : '#000000';
-                });
-
-                dropdownValues.forEach(value => {
-                    value.style.color = theme === 'dark' ? '#FFFFFF' : '#000000';
-                });
-
-                dropdownInput.forEach(Dinput => {
-                    Dinput.style.color = theme === 'dark' ? '#FFFFFF' : '#000000';
-                });
-
-            }
-
-
-
             if (n_clicks % 2 === 0) {
 
                 document.documentElement.style.setProperty('--aside-bg-color', 'rgb(248, 246, 246)');
                 // document.getElementById("dash-app-layout").className = "border";
                 // document.getElementById("dash-app-layout").classList.remove('dark-theme');
                 // document.getElementById("dash-app-layout").classList.add('light-theme');
-                applyDropdownStyles('light');
 
                 return [lightColorScheme, 'light', darkIcon, 'Dark']
               }
               document.documentElement.style.setProperty('--aside-bg-color', 'rgb(31, 31, 31)');
-              applyDropdownStyles('dark');
 
 
         return [darktColorScheme, 'dark', lightIcon, 'Light']
@@ -103,5 +65,30 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
         return navbar
         },
 
-    },
+        apply_dropdown_styles: function (forceColorScheme) {
+            let dropdowns = document.querySelectorAll('.Select-control');
+            let dropdownOptions = document.querySelectorAll('.dash-dropdown');
+            let dropdownValues = document.querySelectorAll('.Select-value-label');
+            let dropdownInputs = document.querySelectorAll('.Select-input');
+
+            dropdowns.forEach(dropdown => {
+                dropdown.style.backgroundColor = forceColorScheme === 'dark' ? '#2C2F33' : '#FFFFFF';
+                dropdown.style.color = forceColorScheme === 'dark' ? '#FFFFFF' : '#000000';
+                dropdown.style.border = forceColorScheme === 'dark' ? '1px solid #444' : '1px solid #ccc';
+            });
+
+            dropdownOptions.forEach(option => {
+                option.style.color = forceColorScheme === 'dark' ? '#000000' : '#FFFFFF';
+            });
+
+            dropdownValues.forEach(value => {
+                value.style.color = forceColorScheme === 'dark' ? '#FFFFFF' : '#000000';
+            });
+
+             dropdownInputs.forEach(dinput => {
+                dinput.style.backgroundColor = forceColorScheme === 'dark' ? '#2C2F33' : '#FFFFFF';
+            });
+            return window.dash_clientside.no_update;
+        }
+    }
 });

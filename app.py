@@ -67,6 +67,13 @@ clientside_callback(
     Input("color-scheme-toggle", "n_clicks")
 )
 
+clientside_callback(
+    ClientsideFunction(
+        namespace="clientside",
+        function_name="apply_dropdown_styles"
+    ),
+    Input("mantine-provider", "forceColorScheme")
+)
 
 @callback(
     Output("my-dynamic-dropdown", "options"),

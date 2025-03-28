@@ -128,7 +128,7 @@ layout = dmc.Box([
             dmc.Group([
                 dmc.Title(id='sup_title', order=3), export_btn2
             ], id='sup_title_row', gap='sm', justify='space-between'),
-            dmc.CardSection(dmc.Container(id='table2_row', fluid=True)),
+            dmc.CardSection(dmc.Container(id='table2_row', fluid=True, style={'margin-bottom': '20px'})),
 
         ], withBorder=True)
     ], fluid=True)

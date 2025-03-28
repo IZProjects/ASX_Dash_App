@@ -79,9 +79,10 @@ def get_segmentDescriptions(ticker):
 @callback(
     [Output(component_id='SegmentResultsRow', component_property='children'),
      Output(component_id='SegmentResultsTitle', component_property='children')],
-    Input("ticker", "data"),
+    [Input("ticker", "data"),
+     Input("mantine-provider", "forceColorScheme")],
 )
-def get_segmentResults(ticker):
+def get_segmentResults(ticker,theme):
     try:
         if ticker is None:
             ticker = "TPG_AU"
@@ -95,9 +96,20 @@ def get_segmentResults(ticker):
         body_style = [
                          {
                              'if': {'row_index': underlineIndex},
-                             'borderBottom': '1px solid black',
+                             'borderBottom': '1px solid',
                          }
                      ]
+
+        if theme == 'light':
+            theme_style = {
+                'backgroundColor': 'rgb(255, 255, 255)',
+                'color': 'black'
+            }
+        else:
+            theme_style = {
+                'backgroundColor': 'rgb(50, 50, 50)',
+                'color': 'white'
+            }
 
         table = dash_table.DataTable(
             id='table',
@@ -111,6 +123,7 @@ def get_segmentResults(ticker):
             style_cell={'minWidth': '120px', 'width': '120px', 'maxWidth': '600px',
                         'textAlign': 'center'},
             style_data_conditional=body_style,
+            style_data=theme_style,
             editable=False,
             )
         return table, dmc.Title("Segment Results", order=4)
