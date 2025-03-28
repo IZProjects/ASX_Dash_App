@@ -99,19 +99,19 @@ layout = dmc.Box([
     dmc.Container(html.Hr(), fluid=True, style={'margin-bottom': '10px', 'margin-top': '10px'}),
 
     dmc.Container(dmc.Title("Valuation", order=4), fluid=True, style={'margin-bottom': '10px', 'margin-top': '20px'}),
-    dmc.Container(dcc.Dropdown(valuation_items, 'Price to Earnings', id='dropdown1'), fluid=True),
+    dmc.Container(dcc.Dropdown(valuation_items, 'Price to Earnings', style={'color':'black'}, id='dropdown1'), fluid=True),
     dmc.Container(dcc.Graph(id="Graph1"), fluid=True),
 
     dmc.Container(dmc.Title("Efficiency / Margins", order=4), fluid=True, style={'margin-bottom': '10px', 'margin-top': '20px'}),
-    dmc.Container(dcc.Dropdown(efficiency_items, 'Return on Equity', id='dropdown2'), fluid=True),
+    dmc.Container(dcc.Dropdown(efficiency_items, 'Return on Equity', style={'color':'black'}, id='dropdown2'), fluid=True),
     dmc.Container(dcc.Graph(id="Graph2"), fluid=True),
 
     dmc.Container(dmc.Title("Growth", order=4), fluid=True, style={'margin-bottom': '10px', 'margin-top': '20px'}),
-    dmc.Container(dcc.Dropdown(growth_items, 'Revenue Growth', id='dropdown3'), fluid=True),
+    dmc.Container(dcc.Dropdown(growth_items, 'Revenue Growth', style={'color':'black'}, id='dropdown3'), fluid=True),
     dmc.Container(dcc.Graph(id="Graph3"), fluid=True),
 
     dmc.Container(dmc.Title("Other Useful Metrics", order=4), fluid=True, style={'margin-bottom': '10px', 'margin-top': '20px'}),
-    dmc.Container(dcc.Dropdown(other_items, 'Debt to Equity', id='dropdown4'), fluid=True),
+    dmc.Container(dcc.Dropdown(other_items, 'Debt to Equity', style={'color':'black'}, id='dropdown4'), fluid=True),
     dmc.Container(dcc.Graph(id="Graph4"), fluid=True),
 
 ])

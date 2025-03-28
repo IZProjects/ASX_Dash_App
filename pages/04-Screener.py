@@ -497,13 +497,5 @@ def toggle_modal(n1, n2, is_open):
         return not is_open
     return is_open
 
-clientside_callback(
-    ClientsideFunction(
-        namespace="clientside",
-        function_name="apply_dropdown_styles"
-    ),
-    Input("mantine-provider", "forceColorScheme")
-)
-
 
 
