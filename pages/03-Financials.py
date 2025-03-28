@@ -1,6 +1,5 @@
 import dash
-from dash import html, dcc, Input, Output, callback, dash_table, clientside_callback
-import dash_bootstrap_components as dbc
+from dash import html, Input, Output, callback, dash_table, clientside_callback
 import pandas as pd
 import dash_mantine_components as dmc
 from mysql_connect_funcs import get_df_tblName
@@ -85,10 +84,10 @@ button_group4 = dmc.SegmentedControl(
     id="radios_direction",
     color='indigo',
     data=[
-        {"label": "Forward", "value": "Forward"},
-        {"label": "Reverse", "value": "Reverse"},
+        {"label": "Descending", "value": "Descending"},
+        {"label": "Ascending", "value": "Ascending"},
     ],
-    value="Forward",
+    value="Descending",
 )
 
 export_btn = dmc.Button("Export", id='exportBtn', color="gray")
@@ -96,36 +95,45 @@ export_btn = dmc.Button("Export", id='exportBtn', color="gray")
 export_btn2 = dmc.Button("Export", id='exportBtn2', color="gray")
 
 
+layout = dmc.Box([
+    dmc.Grid([
+        dmc.GridCol([dmc.Grid(dmc.Title(id='stock_name', order=2), style={'margin-bottom': '10px'}),
+                     dmc.Grid(
+                         dmc.Group([
+                             dmc.Badge(id='currency_badge', color="indigo", className="me-1"),
+                             dmc.Badge(id='sector_badge', color="red", className="me-1"),
+                             dmc.Badge(id='industry_badge', color="violet", className="me-1"),
+                             dmc.Badge(id='category_badge', color="gray", className="me-1")
+                         ], gap='sm')
+                     )
+                     ], span='content'),
+        dmc.GridCol([dmc.Grid(dmc.Title(id='stock_price', order=2), style={'margin-bottom': '10px'}),
+                     dmc.Grid(dmc.Text(id="price_change", size='md'), id='price_change_row')],
+                    span='content', offset='auto'),
+    ], justify='space-between',
+        style={'margin-bottom': '20px', 'margin-top': '20px', 'margin-left': '20px', 'margin-right': '20px'}),
 
-# Layout
-layout = dbc.Spinner(dbc.Container([
+    dmc.Container(html.Hr(), fluid=True),
 
-    dbc.Row([
-        dbc.Col([dbc.Row(html.H2(id='stock_name')),
-                 dbc.Row(html.Span([
-                     dbc.Badge(id='currency_badge', color="primary", className="me-1"),
-                     dbc.Badge(id='sector_badge', color="warning", className="me-1"),
-                     dbc.Badge(id='industry_badge', color="danger", className="me-1"),
-                     dbc.Badge(id='category_badge', color="dark", className="me-1")]))
-                 ], width=10),
-        dbc.Col([dbc.Row(html.H2(id='stock_price')),
-                 dbc.Row(html.P(id="price_change"),id='price_change_row')],
-                width=2, style={'text-align': 'right'}),
-    ], style={'margin-bottom': '10px'}),
-    dbc.Row(html.Hr()),
+    dmc.Group([button_group1, button_group2],
+              gap='md', justify='space-between', className="justify-content-between", style={'margin-bottom': '20px'}),
 
-    dbc.Stack([button_group1,button_group2],
-              direction="horizontal",gap=3,className="justify-content-between",style={'margin-bottom': '20px'}),
+    dmc.Container([
+        dmc.Card([
+            dmc.Group([
+                dmc.Title(id='statement_name', order=3), button_group3, button_group4, export_btn
+            ], gap='md', justify='space-between', style={'margin-bottom': '20px'}),
+            dmc.CardSection(dmc.Container(id='table-container', fluid=True), style={'margin-bottom': '40px'}),
 
-    dbc.Row([dbc.Card([dbc.CardHeader(dbc.Stack([html.H4(id='statement_name'), button_group3, button_group4, export_btn],
-                                                direction="horizontal", gap=3, className="justify-content-between")),
-                       dbc.CardBody([dbc.Row(id='table-container', style={'margin-bottom': '40px'}),
-                                    dbc.Stack([html.Div(id='sup_title'), html.Div(export_btn2, id='sup_title_row')],direction="horizontal", gap=3, className="justify-content-between"),
-                                    dbc.Row(id='table2_row')]
-                                    )])])
-]),color="primary",delay_hide=10,delay_show=15,spinner_style={"position":"absolute", "top":"20%"})
+            dmc.Group([
+                dmc.Title(id='sup_title', order=3), export_btn2
+            ], id='sup_title_row', gap='sm', justify='space-between'),
+            dmc.CardSection(dmc.Container(id='table2_row', fluid=True)),
 
+        ], withBorder=True)
+    ], fluid=True)
 
+])
 
 @callback(
     [Output(component_id='table-container', component_property='children'),
@@ -135,9 +143,10 @@ layout = dbc.Spinner(dbc.Container([
      Input(component_id='radios_period', component_property='value'),
      Input(component_id='radios_units', component_property='value'),
      Input(component_id='radios_direction', component_property='value'),
-     Input(component_id="ticker", component_property="data")]
+     Input(component_id="ticker", component_property="data"),
+     Input("mantine-provider", "forceColorScheme")]
 )
-def create_table(statement, period, units, direction, ticker):
+def create_table(statement, period, units, direction, ticker, theme):
     try:
         title = statement.replace('_', ' ')
         title = title.title()
@@ -185,36 +194,75 @@ def create_table(statement, period, units, direction, ticker):
             boldIndex = []
             underlineIndex = []
 
-        body_style = [
-                         {
-                             'if': {'row_index': boldIndex},
-                             'fontWeight': 'bold',
-                         }
-                     ] + [
-                         {
-                             'if': {'row_index': boldIndex},
-                             'color': 'black',
-                         }
-                     ] + [
-                         {
-                             'if': {'row_index': underlineIndex},
-                             'borderBottom': '2px solid black',
-                         }
-                     ] + [
-                         {
-                             'if': {'column_id': 'Item'},
-                             'textAlign': 'left',
-                         }
-                     ] + [
-                         {
-                             'if': {'column_id': x, 'row_index': y},
-                             'color': 'red',
-                         } for x, y in negatives
-                     ]
+        if theme == "light":
+            body_style = [
+                             {
+                                 'if': {'row_index': boldIndex},
+                                 'fontWeight': 'bold',
+                             }
+                         ] + [
+                             {
+                                 'if': {'row_index': boldIndex},
+                                 'color': 'black',
+                             }
+                         ] + [
+                             {
+                                 'if': {'row_index': underlineIndex},
+                                 'borderBottom': '2px solid black',
+                             }
+                         ] + [
+                             {
+                                 'if': {'column_id': 'Item'},
+                                 'textAlign': 'left',
+                             }
+                         ] + [
+                             {
+                                 'if': {'column_id': x, 'row_index': y},
+                                 'color': 'red',
+                             } for x, y in negatives
+                         ]
+
+
+        else:
+            body_style = [
+                             {
+                                 'if': {'row_index': boldIndex},
+                                 'fontWeight': 'bold',
+                             }
+                         ] + [
+                             {
+                                 'if': {'row_index': boldIndex},
+                                 'color': 'white',
+                             }
+                         ] + [
+                             {
+                                 'if': {'row_index': underlineIndex},
+                                 'borderBottom': '2px solid white',
+                             }
+                         ] + [
+                             {
+                                 'if': {'column_id': 'Item'},
+                                 'textAlign': 'left',
+                             }
+                         ] + [
+                             {
+                                 'if': {'column_id': x, 'row_index': y},
+                                 'color': 'red',
+                             } for x, y in negatives
+                         ]
+        if theme == 'light':
+            theme_style = {
+                'backgroundColor': 'rgb(255, 255, 255)',
+                'color': 'black'
+            }
+        else:
+            theme_style = {
+                'backgroundColor': 'rgb(50, 50, 50)',
+                'color': 'white'
+            }
 
         firstColumn_style = [{
             'if': {'column_id': 'Item'},
-            #'minWidth': '300px',
             'padding-right': '30px',
             'padding-left': '10px'
         }]
@@ -225,15 +273,16 @@ def create_table(statement, period, units, direction, ticker):
         }]
 
 
+
         OGcols = df.columns.tolist()
         reversed_columns = OGcols[:1] + OGcols[1:][::-1]
         df_reversed = df[reversed_columns]
 
 
-        if direction == 'Forward':
-            df_final = df
-        else:
+        if direction == 'Descending':
             df_final = df_reversed
+        else:
+            df_final = df
 
         table = dash_table.DataTable(
             id='table',
@@ -246,26 +295,24 @@ def create_table(statement, period, units, direction, ticker):
             style_header_conditional=firstColHeader_style,
             style_data_conditional=body_style,
             style_table = {'overflowX': 'auto', 'overflowY': 'auto','minWidth': '100%','z-index':'0'},
-            style_cell={#'height': 'auto',
-                        'minWidth': '120px', 'maxWidth': '600px',
-                        #'whiteSpace': 'normal',
+            style_cell={'minWidth': '120px', 'maxWidth': '600px',
                         'textAlign': 'center'},
-            #style_as_list_view=True,
-            #fixed_columns={'headers': True, 'data': 1},
-            #fixed_rows={'headers': True},
             style_cell_conditional=firstColumn_style,
             editable=False,
+            style_data=theme_style,
             export_format = 'xlsx',
-            export_headers = 'display'
+            export_headers = 'display',
             )
 
-        return table,title,html.H4("Supplementary Data")
+        return table,title,"Supplementary Data"
     except:
         alert = dmc.Alert(
             "Sorry! This data is not available.",
+            id="alert-supTBL",
             title="Error!",
             color="red",
             withCloseButton=True,
+            hide=False
         ),
         return alert,'','',
 
@@ -293,9 +340,10 @@ clientside_callback(
      Input(component_id='radios_period', component_property='value'),
      Input(component_id='radios_units', component_property='value'),
      Input(component_id='radios_direction', component_property='value'),
-     Input(component_id="ticker", component_property="data")]
+     Input(component_id="ticker", component_property="data"),
+     Input("mantine-provider", "forceColorScheme")]
 )
-def create_table(statement, period, units, direction, ticker):
+def create_table(statement, period, units, direction, ticker, theme):
     try:
         if ticker is None:
             ticker = "TPG_AU"
@@ -371,7 +419,6 @@ def create_table(statement, period, units, direction, ticker):
 
         firstColumn_style = [{
             'if': {'column_id': 'Item'},
-            #'minWidth': '300px',
             'padding-right': '30px',
             'padding-left': '10px'
         }]
@@ -386,8 +433,19 @@ def create_table(statement, period, units, direction, ticker):
         reversed_columns = OGcols[:1] + OGcols[1:][::-1]
         df_reversed = df[reversed_columns]
 
+        if theme == 'light':
+            theme_style = {
+                'backgroundColor': 'rgb(255, 255, 255)',
+                'color': 'black'
+            }
+        else:
+            theme_style = {
+                'backgroundColor': 'rgb(50, 50, 50)',
+                'color': 'white'
+            }
 
-        if direction == 'Forward':
+
+        if direction == 'Descending':
             df_final = df
         else:
             df_final = df_reversed
@@ -403,26 +461,25 @@ def create_table(statement, period, units, direction, ticker):
             style_header_conditional=firstColHeader_style,
             style_data_conditional=body_style,
             style_table = {'overflowX': 'auto', 'overflowY': 'auto','minWidth': '100%','z-index':'0'},
-            style_cell={#'height': 'auto',
-                        'minWidth': '120px', 'maxWidth': '600px',
-                        #'whiteSpace': 'normal',
+            style_cell={'minWidth': '120px', 'maxWidth': '600px',
                         'textAlign': 'center'},
-            #style_as_list_view=True,
             style_cell_conditional=firstColumn_style,
             fixed_columns={'headers': True, 'data': 1},
-            #fixed_rows={'headers': True},
             editable=False,
             export_format = 'xlsx',
-            export_headers = 'display'
+            export_headers = 'display',
+            style_data=theme_style
             )
 
         return table, sup_title_style, sup_title_style2, table_style
     except:
         alert = dmc.Alert(
             "Sorry! This data is not available.",
+            id="alert-finsTBL",
             title="Error!",
             color="red",
             withCloseButton=True,
+            hide=False
         ),
         return alert,'','',''
 

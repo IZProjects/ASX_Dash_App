@@ -1,10 +1,12 @@
 import dash
-from dash import html, dcc, Input, Output, callback, State
-import dash_bootstrap_components as dbc
+from dash import dcc, Input, Output, callback, State, page_container, clientside_callback, ClientsideFunction
 from dash.exceptions import PreventUpdate
-#from dash_bootstrap_templates import ThemeSwitchAIO
 from mysql_connect_funcs import get_df_tblName, get_df_query
 from flask import Flask
+import dash_mantine_components as dmc
+from components.header import header
+from components.sidebar import sidebar
+
 
 df = get_df_tblName("metadataTBL")
 df = df.drop_duplicates()
@@ -15,50 +17,56 @@ value = df['value'].to_list()
 
 options = [{"label": lbl, "value": val} for lbl, val in zip(label, value)]
 
+
 server = Flask(__name__)
+dash._dash_renderer._set_react_version("18.2.0")
+app = dash.Dash(__name__, server=server, use_pages=True, external_stylesheets=dmc.styles.ALL)
+#app = dash.Dash(__name__, use_pages=True, external_stylesheets=dmc.styles.ALL])
 
-app = dash.Dash(__name__, server=server, use_pages=True, external_stylesheets=[dbc.themes.SPACELAB])
-#app = dash.Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.SPACELAB])
 
-
-sidebar = html.Div(
+layout = dmc.AppShell(
     [
-        html.H4("SiteName", className="display-4"),
-        html.Hr(),
-        html.P(
-            "A simple sidebar layout with navigation links", className="lead"
-        ),
-        dbc.Nav(
-            [
-                dbc.NavLink(
-                    [
-                        html.Div(page["name"], className="ms-2"),
-                    ],
-                    href=page["path"],
-                    active="exact",
-                )
-                for page in dash.page_registry.values()
-            ],
-            vertical=True,
-            pills=True,
-        ),
+        dcc.Location(id='url', refresh=True),
+        dcc.Store(id="ticker", storage_type='session', data={}),
+        dcc.Store(id='single_ticker_metadata', storage_type='session', data={}),
+        dmc.AppShellHeader(header, style={'padding-left': '20px', 'padding-right': '20px'}),
+        dmc.AppShellNavbar(sidebar, style={'padding-left': '10px', 'padding-right': '10px', 'margin-top': '20px'}),
+        dcc.Loading([
+            dmc.AppShellMain(page_container),
+        ], style={"position":"absolute", "top":"20%"})
     ],
-    style={'position':'sticky', 'top':'0', 'height':'100vh'},
+    header={"height": 48},
+    navbar={"width": 250, "breakpoint": "md", "collapsed": {"mobile": True}},
+    padding="md",
+    id="appshell",
 )
 
-app.layout = dbc.Container([
-    dcc.Location(id='url', refresh=True),
-    dcc.Store(id="ticker", storage_type='session',data={}),
-    dcc.Store(id='single_ticker_metadata', storage_type='session', data={}),
-    dbc.Row(
-        [
-            dbc.Col([sidebar], width=2, className='column_left', style={'background-color': '#f8f9fa'}),
+app.layout = dmc.MantineProvider(id="mantine-provider",children=[layout])
 
-            dbc.Col([dbc.Row([dbc.Row(dcc.Dropdown(id="my-dynamic-dropdown", placeholder="Search..."))],style={'background-color': 'black', 'position': 'sticky', 'top':'0', 'z-index':'100', 'padding-top': '20px', 'padding-bottom': '27px'}),
-                     dbc.Row([dash.page_container],style={'padding-top': '20px'})], width=10)
-        ]
-    )
-], fluid=True)
+
+clientside_callback(
+    ClientsideFunction(
+        namespace='clientside',
+        function_name='side_bar_toggle'
+    ),
+    Output("appshell", "navbar"),
+    Input("burger-button", "opened"),
+    State("appshell", "navbar"),
+)
+
+
+clientside_callback(
+    ClientsideFunction(
+        namespace='clientside',
+        function_name='theme_switcher_callback'
+    ),
+    Output("mantine-provider", "theme"),
+    Output("mantine-provider", "forceColorScheme"),
+    Output("color-scheme-toggle", "rightSection"),
+    Output("color-scheme-toggle", "label"),
+    Input("color-scheme-toggle", "n_clicks")
+)
+
 
 @callback(
     Output("my-dynamic-dropdown", "options"),

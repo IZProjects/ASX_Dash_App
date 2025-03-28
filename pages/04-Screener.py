@@ -1,6 +1,5 @@
 import dash
 from dash import dcc, html, Input, Output, State, callback, ALL, dash_table
-import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
 import re
 from mysql_connect_funcs import get_df_query
@@ -104,34 +103,34 @@ def generate_checklists(main_list, label):
     sublists = [main_list[i:i + 3] for i in range(0, len(main_list), 3)]
 
     # Create rows with checklists in columns for each sublist
-    rows = [dbc.Label(label, style={'fontSize': '16px', 'fontWeight': 'bold', 'margin-top': '20px'})]
+    rows = [dmc.Title(label, order=5, style={'margin-top': '20px', 'margin-bottom': '5px'})]
     for sublist_index, sublist in enumerate(sublists):
         columns = []
         for item in sublist:
             if item in initially_checked:
                 columns.append(
-                    dbc.Col(
+                    dmc.GridCol(
                         dcc.Checklist(
                             options=[{'label': html.Div(item, style={'font-size': 14, 'padding-left': 10}), 'value': item}],
                             value=[item],
                             id={'type': 'dynamic-checklist', 'index': f'{label}-{item}'},
                             labelStyle={'display': 'flex'}
                         ),
-                        width=4  # Adjust column width as needed
+                        span=4  # Adjust column width as needed
                     )
                 )
             else:
                 columns.append(
-                    dbc.Col(
+                    dmc.GridCol(
                         dcc.Checklist(
                             options=[{'label': html.Div(item, style={'font-size': 14, 'padding-left': 10}), 'value': item}],
                             id={'type': 'dynamic-checklist', 'index': f'{label}-{item}'},
                             labelStyle={'display': 'flex'}
                         ),
-                        width=4  # Adjust column width as needed
+                        span=4  # Adjust column width as needed
                     )
                 )
-        rows.append(dbc.Row(columns, style={'margin-bottom': '10px'}))
+        rows.append(dmc.Grid(columns, justify='space-between', style={'margin-bottom': '10px'}))
     return rows
 
 layout_content = []
@@ -141,47 +140,45 @@ for checklists, label in checklists_details:
 
 modal = html.Div(
     [
-        dbc.Button(children='+ add another filter', size='sz', outline=True, color="primary", n_clicks=0, id="open-centered"),
-        dbc.Modal(
-            [
-                dbc.ModalHeader(dbc.ModalTitle("Stock Screener"), close_button=True, style={'margin-bottom': '-20px'}),
-                dbc.ModalBody(html.Div(layout_content)),
-                dbc.ModalFooter(
-                    dbc.Button(
-                        "Close",
-                        id="close-centered",
-                        className="ms-auto",
-                        n_clicks=0,
-                    )
-                ),
-            ],
+        dmc.Button(children='+ add another filter', size='sm', variant="outline", color="indigo", n_clicks=0, id="open-centered"),
+        dmc.Modal(
+            title="Stock Screener",
             id="modal-centered",
             centered=True,
-            is_open=False,
-            scrollable=True,
-            size='xl'
+            size="75%",
+            children=[
+                dmc.Container(layout_content, fluid=True),
+                dmc.Space(h=20),
+                dmc.Button(
+                    "Close",
+                    color="indigo",
+                    variant="outline",
+                    id="close-centered",
+                    n_clicks=0,
+                ),
+            ]
         ),
     ]
 )
 
 
-# Layout
-layout = dbc.Spinner(dbc.Container([
-    dcc.Store(id='store-selected-values', storage_type='session',data={}),
-    dcc.Store(id='store-selected-values', storage_type='session',data={}),
-    dcc.Store(id='store_numeric', storage_type='session',data={}),
-    dcc.Store(id='store_singular', storage_type='session',data={}),
-    dcc.Store(id='store_ratio', storage_type='session',data={}),
-    dcc.Store(id='store_pct', storage_type='session',data={}),
-    dcc.Store(id='store_sector', storage_type='session',data={}),
-    dcc.Store(id='store_industry', storage_type='session',data={}),
-    dcc.Store(id='store_exchange', storage_type='session',data={}),
-    dcc.Store(id='query', storage_type='session',data={}),
-    dbc.Row(id='cards_section', style={'margin-bottom': '20px'}),
-    dbc.Stack([modal, dbc.Button('Submit', id='submit_button', color='primary', outline=True)],
-              direction="horizontal", gap=3, className="justify-content-between"),
-    dbc.Row(id='output-container', style={'margin-top': '20px'}),
-]),color="primary",delay_hide=10,delay_show=15,spinner_style={"position":"absolute", "top":"20%"})
+layout = dmc.Box([
+    dcc.Store(id='store-selected-values', storage_type='session', data={}),
+    dcc.Store(id='store-selected-values', storage_type='session', data={}),
+    dcc.Store(id='store_numeric', storage_type='session', data={}),
+    dcc.Store(id='store_singular', storage_type='session', data={}),
+    dcc.Store(id='store_ratio', storage_type='session', data={}),
+    dcc.Store(id='store_pct', storage_type='session', data={}),
+    dcc.Store(id='store_sector', storage_type='session', data={}),
+    dcc.Store(id='store_industry', storage_type='session', data={}),
+    dcc.Store(id='store_exchange', storage_type='session', data={}),
+    dcc.Store(id='query', storage_type='session', data={}),
+    dmc.Box(id='cards_section', style={'margin-bottom': '20px'}),
+    dmc.Group([modal, dmc.Button('Submit', id='submit_button', color='indigo', variant='outline')],
+               gap='md', justify='space-between',className="justify-content-between"),
+    dmc.Container(id='output-container', fluid=True, style={'margin-top': '20px'}),
+])
+
 
 @callback(
     [Output('cards_section', 'children'),
@@ -224,111 +221,97 @@ def generate_cards(*selected_values):
                             'Medical Care Facilities','Electronic Components','Coking Coal','Other Precious Metals & Mining','Mortgage Finance','Other Industrial Metals & Mining','Internet Content & Information']
 
     for item in selected_list:
-        cardNumeric = dbc.Card(
-            dbc.CardBody(
-                dbc.Row([
-                    dbc.Col(html.Div(item, style={'font-size': 14, 'fontWeight': 'bold'}), width=3),
-                    dbc.Col(dcc.Dropdown(['Greater than', 'Less Than', 'Equal to'], 'Greater than',id={'type': 'numeric_compare', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), width=2),
-                    dbc.Col(dbc.Input(placeholder="Input goes here...",type="number", id={'type': 'numeric_input', 'index': item}, persistence=True, persistence_type ='memory'), width=3),
-                    dbc.Col(dcc.Dropdown(['Thousands', 'Millions', 'Billions'], 'Millions', id={'type': 'numeric_unit', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), width=2),
-                    dbc.Col(dcc.Dropdown(['Filter', 'Display'], 'Filter', id={'type': 'numeric_type', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), width=2)
-                ])
-            )
+        cardNumeric = dmc.Paper(
+            dmc.Grid([
+                dmc.GridCol(dmc.Title(item, order=5), span=3),
+                dmc.GridCol(dcc.Dropdown(['Greater than', 'Less Than', 'Equal to'], 'Greater than',id={'type': 'numeric_compare', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), span=2),
+                dmc.GridCol(dmc.NumberInput(placeholder="Input goes here...", id={'type': 'numeric_input', 'index': item}, persistence=True, persistence_type ='memory'), span=3),
+                dmc.GridCol(dcc.Dropdown(['Thousands', 'Millions', 'Billions'], 'Millions', id={'type': 'numeric_unit', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), span=2),
+                dmc.GridCol(dcc.Dropdown(['Filter', 'Display'], 'Filter', id={'type': 'numeric_type', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), span=2)
+            ]), p='md', withBorder=True, shadow='sm'
         )
-        cardSingularNumeric = dbc.Card(
-            dbc.CardBody(
-                dbc.Row([
-                    dbc.Col(html.Div(item, style={'font-size': 14, 'fontWeight': 'bold'}), width=3),
-                    dbc.Col(dcc.Dropdown(['Greater than', 'Less Than', 'Equal to'], 'Greater than',id={'type': 'singular_compare', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), width=2),
-                    dbc.Col(dbc.Input(placeholder="Input goes here...",type="number", id={'type': 'singular_input', 'index': item}, persistence=True, persistence_type ='memory', required = 'True'), width=5),
-                    dbc.Col(dcc.Dropdown(['Filter', 'Display'], 'Filter', id={'type': 'singular_type', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), width=2)
-                ])
-            )
+
+        cardSingularNumeric = dmc.Paper(
+            dmc.Grid([
+                dmc.GridCol(dmc.Title(item, order=5), span=3),
+                dmc.GridCol(dcc.Dropdown(['Greater than', 'Less Than', 'Equal to'], 'Greater than',id={'type': 'singular_compare', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), span=2),
+                dmc.GridCol(dmc.NumberInput(placeholder="Input goes here...", id={'type': 'singular_input', 'index': item}, persistence=True, persistence_type ='memory'), span=5),
+                dmc.GridCol(dcc.Dropdown(['Filter', 'Display'], 'Filter', id={'type': 'singular_type', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), span=2)
+            ]), p='md', withBorder=True, shadow='sm'
         )
-        cardSector = dbc.Card(
-            dbc.CardBody(
-                dbc.Row([
-                    dbc.Col(html.Div(item, style={'font-size': 14, 'fontWeight': 'bold'}), width=3),
-                    dbc.Col(dcc.Dropdown(morningstar_sectors, id={'type': 'sector_select', 'index': item}, multi=True, persistence=True, persistence_type ='memory'), width=7),
-                    dbc.Col(dcc.Dropdown(['Filter', 'Display'], 'Filter', id={'type': 'sector_type', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), width=2)
-                ])
-            )
+        cardSector = dmc.Paper(
+            dmc.Grid([
+                dmc.GridCol(dmc.Title(item, order=5), span=3),
+                dmc.GridCol(dcc.Dropdown(morningstar_sectors, id={'type': 'sector_select', 'index': item}, multi=True, persistence=True, persistence_type ='memory'), span=7),
+                dmc.GridCol(dcc.Dropdown(['Filter', 'Display'], 'Filter', id={'type': 'sector_type', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), span=2)
+            ]), p='md', withBorder=True, shadow='sm'
         )
-        cardIndustry = dbc.Card(
-            dbc.CardBody(
-                dbc.Row([
-                    dbc.Col(html.Div(item, style={'font-size': 14, 'fontWeight': 'bold'}), width=3),
-                    dbc.Col(dcc.Dropdown(morningstar_industry, id={'type': 'industry_select', 'index': item}, multi=True, persistence=True, persistence_type ='memory'), width=7),
-                    dbc.Col(dcc.Dropdown(['Filter', 'Display'], 'Filter', id={'type': 'industry_type', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), width=2)
-                ])
-            )
+        cardIndustry = dmc.Paper(
+            dmc.Grid([
+                dmc.GridCol(dmc.Title(item, order=5), span=3),
+                dmc.GridCol(dcc.Dropdown(morningstar_industry, id={'type': 'industry_select', 'index': item}, multi=True, persistence=True, persistence_type ='memory'), span=7),
+                dmc.GridCol(dcc.Dropdown(['Filter', 'Display'], 'Filter', id={'type': 'industry_type', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), span=2)
+            ]), p='md', withBorder=True, shadow='sm'
         )
-        cardExchange = dbc.Card(
-            dbc.CardBody(
-                dbc.Row([
-                    dbc.Col(html.Div(item, style={'font-size': 14, 'fontWeight': 'bold'}), width=3),
-                    dbc.Col(dcc.Dropdown(['ASX'], id={'type': 'exchange_select', 'index': item}, multi=True, persistence=True, persistence_type ='memory'), width=7),
-                    dbc.Col(dcc.Dropdown(['Filter', 'Display'], 'Filter', id={'type': 'exchange_type', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), width=2)
-                ])
-            )
+        cardExchange = dmc.Paper(
+            dmc.Grid([
+                dmc.GridCol(dmc.Title(item, order=5), span=3),
+                dmc.GridCol(dcc.Dropdown(['ASX'], id={'type': 'exchange_select', 'index': item}, multi=True, persistence=True, persistence_type ='memory'), span=7),
+                dmc.GridCol(dcc.Dropdown(['Filter', 'Display'], 'Filter', id={'type': 'exchange_type', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), span=2)
+            ]), p='md', withBorder=True, shadow='sm'
         )
-        cardRatio = dbc.Card(
-            dbc.CardBody(
-                dbc.Row([
-                    dbc.Col(html.Div(item, style={'font-size': 14, 'fontWeight': 'bold'}), width=3),
-                    dbc.Col(dcc.Dropdown(['Greater than', 'Less Than', 'Equal to'], 'Greater than', id={'type': 'ratio_compare', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), width=2),
-                    dbc.Col(dbc.Input(placeholder="Input goes here...",type="number", id={'type': 'ratio_input', 'index': item}, persistence=True, persistence_type ='memory'), width=3),
-                    dbc.Col(dcc.Dropdown(['Ratio'], 'Ratio', id={'type': 'ratio_unit', 'index': item}, searchable=False), width=2),
-                    dbc.Col(dcc.Dropdown(['Filter', 'Display'], 'Filter', id={'type': 'ratio_type', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), width=2)
-                ])
-            )
+        cardRatio = dmc.Paper(
+            dmc.Grid([
+                dmc.GridCol(dmc.Title(item, order=5), span=3),
+                dmc.GridCol(dcc.Dropdown(['Greater than', 'Less Than', 'Equal to'], 'Greater than', id={'type': 'ratio_compare', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), span=2),
+                dmc.GridCol(dmc.NumberInput(placeholder="Input goes here...", id={'type': 'ratio_input', 'index': item}, persistence=True, persistence_type ='memory'), span=3),
+                dmc.GridCol(dcc.Dropdown(['Ratio'], 'Ratio', id={'type': 'ratio_unit', 'index': item}, searchable=False), span=2),
+                dmc.GridCol(dcc.Dropdown(['Filter', 'Display'], 'Filter', id={'type': 'ratio_type', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), span=2)
+            ]), p='md', withBorder=True, shadow='sm'
         )
-        cardPercentage = dbc.Card(
-            dbc.CardBody(
-                dbc.Row([
-                    dbc.Col(html.Div(item, style={'font-size': 14, 'fontWeight': 'bold'}), width=3),
-                    dbc.Col(dcc.Dropdown(['Greater than', 'Less Than', 'Equal to'], 'Greater than', id={'type': 'pct_compare', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), width=2),
-                    dbc.Col(dbc.Input(placeholder="Input goes here...",type="number", id={'type': 'pct_input', 'index': item}, min=-100, max=100, persistence=True, persistence_type ='memory'), width=3),
-                    dbc.Col(dcc.Dropdown(['%'], '%', id={'type': 'pct_unit', 'index': item}, searchable=False), width=2),
-                    dbc.Col(dcc.Dropdown(['Filter', 'Display'], 'Filter', id={'type': 'pct_type', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), width=2)
-                ])
-            )
+        cardPercentage = dmc.Paper(
+            dmc.Grid([
+                dmc.GridCol(dmc.Title(item, order=5), span=3),
+                dmc.GridCol(dcc.Dropdown(['Greater than', 'Less Than', 'Equal to'], 'Greater than', id={'type': 'pct_compare', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), span=2),
+                dmc.GridCol(dmc.NumberInput(placeholder="Input goes here...", suffix="%", id={'type': 'pct_input', 'index': item}, min=-100, max=100, persistence=True, persistence_type ='memory'), span=5),
+                dmc.GridCol(dcc.Dropdown(['Filter', 'Display'], 'Filter', id={'type': 'pct_type', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), span=2)
+            ]), p='md', withBorder=True, shadow='sm'
         )
 
         if item == 'Sector':
             rows.append(
-                dbc.Row(cardSector, style={'margin-bottom': '10px'})
+                dmc.Container(cardSector, fluid=True, style={'margin-bottom': '10px'})
             )
             sector.append(item)
         elif item == "Industry":
             rows.append(
-                dbc.Row(cardIndustry, style={'margin-bottom': '10px'})
+                dmc.Container(cardIndustry, fluid=True, style={'margin-bottom': '10px'})
             )
             industry.append(item)
         elif item == "Exchange":
             rows.append(
-                dbc.Row(cardExchange, style={'margin-bottom': '10px'})
+                dmc.Container(cardExchange, fluid=True, style={'margin-bottom': '10px'})
             )
             exchange.append(item)
         elif item in ratio_items:
             rows.append(
-                dbc.Row(cardRatio, style={'margin-bottom': '10px'})
+                dmc.Container(cardRatio, fluid=True, style={'margin-bottom': '10px'})
             )
             ratio.append(item)
         elif item in percentage_items:
             rows.append(
-                dbc.Row(cardPercentage, style={'margin-bottom': '10px'})
+                dmc.Container(cardPercentage, fluid=True, style={'margin-bottom': '10px'})
             )
             pct.append(item)
         elif item in singular_items:
             rows.append(
-                dbc.Row(cardSingularNumeric, style={'margin-bottom': '10px'})
+                dmc.Container(cardSingularNumeric, fluid=True, style={'margin-bottom': '10px'})
             )
             singular.append(item)
         else:
             rows.append(
 
-                dbc.Row(cardNumeric, style={'margin-bottom': '10px'})
+                dmc.Container(cardNumeric, fluid=True, style={'margin-bottom': '10px'})
             )
             numeric.append(item)
 
@@ -455,18 +438,22 @@ def print_values(n_clicks, ratio_items, pct_items, singular_items, numeric_items
     except:
         alert = dmc.Alert(
             "Please check the filters and submit again!",
+            id="alert-screenerTBL1",
             title="Error!",
             color="red",
             withCloseButton=True,
+            hide=False
         )
         return alert
 
     if 'None' in query:
         alert = dmc.Alert(
             "Please check the filters and submit again!",
+            id="alert-screenerTBL2",
             title="Error!",
             color="red",
             withCloseButton=True,
+            hide=False
         )
         return alert
 
@@ -501,9 +488,9 @@ def print_values(n_clicks, ratio_items, pct_items, singular_items, numeric_items
 
 
 @callback(
-    Output("modal-centered", "is_open"),
+    Output("modal-centered", "opened"),
     [Input("open-centered", "n_clicks"), Input("close-centered", "n_clicks")],
-    [State("modal-centered", "is_open")],
+    [State("modal-centered", "opened")],
 )
 def toggle_modal(n1, n2, is_open):
     if n1 or n2:

@@ -1,30 +1,35 @@
 import dash
 from dash import html, callback, Output, Input, dash_table
-import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
 from mysql_connect_funcs import get_cursor, get_df_query
 
 dash.register_page(__name__, name='Segment')
 
-layout = dbc.Spinner(dbc.Container([
-    dbc.Row([
-        dbc.Col([dbc.Row(html.H2(id='stock_name')),
-                 dbc.Row(html.Span([
-                     dbc.Badge(id='currency_badge', color="primary", className="me-1"),
-                     dbc.Badge(id='sector_badge', color="warning", className="me-1"),
-                     dbc.Badge(id='industry_badge', color="danger", className="me-1"),
-                     dbc.Badge(id='category_badge', color="dark", className="me-1")]))
-                 ], width=10),
-        dbc.Col([dbc.Row(html.H2(id='stock_price')),
-                 dbc.Row(html.P(id="price_change"), id='price_change_row')],
-                width=2, style={'text-align': 'right'}),
-    ], style={'margin-bottom': '10px'}),
-    dbc.Row(html.Hr()),
+layout = dmc.Box([
+    dmc.Grid([
+        dmc.GridCol([dmc.Grid(dmc.Title(id='stock_name', order=2), style={'margin-bottom': '10px'}),
+                     dmc.Grid(
+                         dmc.Group([
+                             dmc.Badge(id='currency_badge', color="indigo", className="me-1"),
+                             dmc.Badge(id='sector_badge', color="red", className="me-1"),
+                             dmc.Badge(id='industry_badge', color="violet", className="me-1"),
+                             dmc.Badge(id='category_badge', color="gray", className="me-1")
+                         ], gap='sm')
+                     )
+                     ], span='content'),
+        dmc.GridCol([dmc.Grid(dmc.Title(id='stock_price', order=2), style={'margin-bottom': '10px'}),
+                     dmc.Grid(dmc.Text(id="price_change", size='md'), id='price_change_row')],
+                    span='content', offset='auto'),
+    ], justify='space-between',
+        style={'margin-bottom': '20px', 'margin-top': '20px', 'margin-left': '20px', 'margin-right': '20px'}),
 
-    dbc.Row(id='SegmentDescriptionRow', style={'margin-bottom': '20px'}),
-        dbc.Row(id='SegmentResultsTitle', style={'margin-top': '20px', 'margin-bottom': '5px'}),
-    dbc.Row(id='SegmentResultsRow'),
-]),color="primary",delay_hide=10,delay_show=15,spinner_style={"position":"absolute", "top":"20%"})
+    dmc.Container(html.Hr(), fluid=True),
+
+    dmc.Container(id='SegmentDescriptionRow', fluid=True, style={'margin-bottom': '20px'}),
+    dmc.Container(id='SegmentResultsTitle', fluid=True, style={'margin-top': '20px', 'margin-bottom': '5px'}),
+    dmc.Container(id='SegmentResultsRow', fluid=True),
+
+])
 
 @callback(
     Output(component_id='SegmentDescriptionRow', component_property='children'),
@@ -34,16 +39,11 @@ def get_segmentDescriptions(ticker):
     try:
         if ticker is None:
             ticker = "TPG_AU"
-        #conn = sqlite3.connect('databases/AI_content.db')
-        #cursor = conn.cursor()
-        #query = "SELECT content FROM SegmentDescription WHERE ticker = " + ticker[0:-3]
         query = "SELECT content FROM SegmentDescription WHERE ticker = :ticker;"
         params = {"ticker": ticker[0:-3]}
-        #cursor.execute(query)
-        #texts = cursor.fetchone()
         texts = get_cursor(query,params)
         texts = texts[0]
-        #conn.close()
+
 
         texts = texts.replace(':', ':\n')
         texts = texts.replace('*', '')
@@ -51,10 +51,10 @@ def get_segmentDescriptions(ticker):
         formatted_lines = []
         for i in range(len(lines)):
             if ':' in lines[i]:
-                formatted_lines.append(dmc.Text(lines[i], fw=500, c="black", style={'margin-top': '10px'}))
+                formatted_lines.append(dmc.Title(lines[i], order=5, style={'margin-top': '10px'}))
             elif '#' in lines[i]:
                 lines[i] = lines[i].replace('#', '')
-                formatted_lines.append(dmc.Text(lines[i], fw=500, c="black", style={'margin-top': '10px'}))
+                formatted_lines.append(dmc.Title(lines[i], order=5, style={'margin-top': '10px'}))
             elif i == 0:
                 formatted_lines.append(dmc.Text(lines[i]))
             elif lines[i].strip() == '':
@@ -67,9 +67,11 @@ def get_segmentDescriptions(ticker):
     except:
         alert = dmc.Alert(
             "Sorry! This data is not available.",
+            id="alert-segment",
             title="Error!",
             color="red",
             withCloseButton=True,
+            hide=False
         ),
         return alert
 
@@ -83,9 +85,7 @@ def get_segmentResults(ticker):
     try:
         if ticker is None:
             ticker = "TPG_AU"
-        #conn = sqlite3.connect('databases/AI_content.db')
         query = "SELECT * FROM `" + ticker[0:-3] + "_segmentResults`"
-        #df = pd.read_sql_query(query, conn)
         df = get_df_query(query)
         df.columns = df.columns.str.title()
         df['Year'] = df['Year'].astype(int)
@@ -108,13 +108,11 @@ def get_segmentResults(ticker):
                           'fontWeight': 'bold',
                           'textAlign': 'center'},
             style_table = {'overflowX': 'auto', 'height': '800px', 'overflowY': 'auto','minWidth': '100%','z-index':'0'},
-            style_cell={#'height': 'auto',
-                        'minWidth': '120px', 'width': '120px', 'maxWidth': '600px',
-                        #'whiteSpace': 'normal',
+            style_cell={'minWidth': '120px', 'width': '120px', 'maxWidth': '600px',
                         'textAlign': 'center'},
             style_data_conditional=body_style,
             editable=False,
             )
-        return table, dmc.Text("Segment Results", fw=500, size='xl', c='black')
+        return table, dmc.Title("Segment Results", order=4)
     except:
         return html.Div(" "), html.Div(" ")

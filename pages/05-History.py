@@ -1,6 +1,5 @@
 import dash
 from dash import dcc, html, callback, Output, Input
-import dash_bootstrap_components as dbc
 import pandas as pd
 import dash_mantine_components as dmc
 from mysql_connect_funcs import get_df_query
@@ -11,29 +10,40 @@ button = dmc.SegmentedControl(
     id='controls',
     color="indigo",
     fullWidth=True,
+    size='md',
     data = [{"value": "Short", "label": "Summary"},
             {"value": "Long", "label": "Detailed"}]
 )
 
-layout = dbc.Spinner(dbc.Container([
+
+layout = dmc.Box([
     dcc.Store(id="long_history", storage_type='session', data={}),
     dcc.Store(id="short_history", storage_type='session', data={}),
-    dbc.Row([
-        dbc.Col([dbc.Row(html.H2(id='stock_name')),
-                 dbc.Row(html.Span([
-                     dbc.Badge(id='currency_badge', color="primary", className="me-1"),
-                     dbc.Badge(id='sector_badge', color="warning", className="me-1"),
-                     dbc.Badge(id='industry_badge', color="danger", className="me-1"),
-                     dbc.Badge(id='category_badge', color="dark", className="me-1")]))
-                 ], width=10),
-        dbc.Col([dbc.Row(html.H2(id='stock_price')),
-                 dbc.Row(html.P(id="price_change"), id='price_change_row')],
-                width=2, style={'text-align': 'right'}),
-    ], style={'margin-bottom': '10px'}),
-    dbc.Row(html.Hr()),
-    dbc.Row([dbc.Col(html.Div(''), width = 9), dbc.Col(button, width=3)], style={'margin-bottom': '20px'}),
-    dbc.Row(id='timeline', style={'margin-top': '10px', 'margin-bottom': '20px'}),
-]),color="primary",delay_hide=10,delay_show=15,spinner_style={"position":"absolute", "top":"20%"})
+
+    dmc.Grid([
+        dmc.GridCol([dmc.Grid(dmc.Title(id='stock_name', order=2), style={'margin-bottom': '10px'}),
+                     dmc.Grid(
+                         dmc.Group([
+                             dmc.Badge(id='currency_badge', color="indigo", className="me-1"),
+                             dmc.Badge(id='sector_badge', color="red", className="me-1"),
+                             dmc.Badge(id='industry_badge', color="violet", className="me-1"),
+                             dmc.Badge(id='category_badge', color="gray", className="me-1")
+                         ], gap='sm')
+                     )
+                     ], span='content'),
+        dmc.GridCol([dmc.Grid(dmc.Title(id='stock_price', order=2), style={'margin-bottom': '10px'}),
+                     dmc.Grid(dmc.Text(id="price_change", size='md'), id='price_change_row')],
+                    span='content', offset='auto'),
+    ], justify='space-between',
+        style={'margin-bottom': '20px', 'margin-top': '20px', 'margin-left': '20px', 'margin-right': '20px'}),
+
+    dmc.Container(html.Hr(), fluid=True),
+
+    dmc.Flex(children=[button], justify='flex-end', style={'margin-bottom': '20px', 'margin-right': '20px'}),
+
+    dmc.Container(id='timeline', fluid=True, style={'margin-top': '10px', 'margin-bottom': '20px'}),
+
+])
 
 @callback(
     [Output(component_id='long_history', component_property='data'),
@@ -71,9 +81,11 @@ def get_timeline(long_history, short_history, controls):
     if df.empty:
         alert = dmc.Alert(
             "Sorry! This data is not available.",
+            id="alert-timeline",
             title="Error!",
             color="red",
             withCloseButton=True,
+            hide=False
         ),
         return alert
     else:

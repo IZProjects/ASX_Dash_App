@@ -1,11 +1,11 @@
 import dash
 from dash import dcc, html, callback, Output, Input
-import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.express as px
 import dash_mantine_components as dmc
 from mysql_connect_funcs import get_df_tblName, get_df_query, get_cursor
 import plotly.graph_objects as go
+from utils.df_to_mantineTBL import genTBLContent
 
 dash.register_page(__name__, name='Peer Comparison') # '/' is home page
 
@@ -62,56 +62,59 @@ def format_number(num_str):
     return formatted_number
 
 
-layout = dbc.Spinner(dbc.Container(
-    [
-        dcc.Store(id="target_dict", storage_type='session', data={}),
-        dcc.Store(id="peer1_dict", storage_type='session', data={}),
-        dcc.Store(id="peer2_dict", storage_type='session', data={}),
-        dcc.Store(id="peer3_dict", storage_type='session', data={}),
-        dcc.Store(id="peer4_dict", storage_type='session', data={}),
-        dcc.Store(id="peer5_dict", storage_type='session', data={}),
-        dcc.Store(id="peers", storage_type='session', data=[]),
-        dcc.Store(id="peers_shown", storage_type='session', data=[]),
-        dbc.Row([
-            dbc.Col([dbc.Row(html.H2(id='stock_name')),
-                     dbc.Row(html.Span([
-                         dbc.Badge(id='currency_badge', color="primary", className="me-1"),
-                         dbc.Badge(id='sector_badge', color="warning", className="me-1"),
-                         dbc.Badge(id='industry_badge', color="danger", className="me-1"),
-                         dbc.Badge(id='category_badge', color="dark", className="me-1")]))
-                     ], width=10),
-            dbc.Col([dbc.Row(html.H2(id='stock_price')),
-                     dbc.Row(html.P(id="price_change"), id='price_change_row')],
-                    width=2, style={'text-align': 'right'}),
-        ], style={'margin-bottom': '10px'}),
-        dbc.Row(html.Hr(),style={'margin-bottom': '10px'}),
+layout = dmc.Box([
+    dcc.Store(id="target_dict", storage_type='session', data={}),
+    dcc.Store(id="peer1_dict", storage_type='session', data={}),
+    dcc.Store(id="peer2_dict", storage_type='session', data={}),
+    dcc.Store(id="peer3_dict", storage_type='session', data={}),
+    dcc.Store(id="peer4_dict", storage_type='session', data={}),
+    dcc.Store(id="peer5_dict", storage_type='session', data={}),
+    dcc.Store(id="peers", storage_type='session', data=[]),
+    dcc.Store(id="peers_shown", storage_type='session', data=[]),
 
-        dbc.Row(id='descriptionsTable', style={'margin-bottom': '10px'}),
+    dmc.Grid([
+        dmc.GridCol([dmc.Grid(dmc.Title(id='stock_name', order=2), style={'margin-bottom': '10px'}),
+                     dmc.Grid(
+                         dmc.Group([
+                             dmc.Badge(id='currency_badge', color="indigo", className="me-1"),
+                             dmc.Badge(id='sector_badge', color="red", className="me-1"),
+                             dmc.Badge(id='industry_badge', color="violet", className="me-1"),
+                             dmc.Badge(id='category_badge', color="gray", className="me-1")
+                         ], gap='sm')
+                     )
+                     ], span='content'),
+        dmc.GridCol([dmc.Grid(dmc.Title(id='stock_price', order=2), style={'margin-bottom': '10px'}),
+                     dmc.Grid(dmc.Text(id="price_change", size='md'), id='price_change_row')],
+                    span='content', offset='auto'),
+    ], justify='space-between',
+        style={'margin-bottom': '20px', 'margin-top': '20px', 'margin-left': '20px', 'margin-right': '20px'}),
 
-        dbc.Row(html.Hr(),style={'margin-bottom': '10px'}),
-        dbc.Row(dmc.Text("Peer Comparison Summary", fw=700, size="xl"), style={'margin-bottom': '10px'}),
-        dbc.Row(id='peerTBLRow'),
-        dbc.Row(html.Hr(),style={'margin-bottom': '10px', 'margin-top': '20px'}),
+    dmc.Container(html.Hr(), fluid=True, style={'margin-bottom': '10px', 'margin-top': '10px'}),
 
-        dbc.Row(dmc.Text("Valuation", fw=700, size="xl"), style={'margin-bottom': '10px'}),
-        dbc.Row(dcc.Dropdown(valuation_items, 'Price to Earnings', id='dropdown1')),
-        dbc.Row(dcc.Graph(id="Graph1")),
+    dmc.Container(id='descriptionsTable', fluid=True, style={'margin-bottom': '10px'}),
 
-        dbc.Row(dmc.Text("Efficiency / Margins", fw=700, size="xl"), style={'margin-bottom': '10px'}),
-        dbc.Row(dcc.Dropdown(efficiency_items, 'Return on Equity', id='dropdown2')),
-        dbc.Row(dcc.Graph(id="Graph2")),
+    dmc.Container(html.Hr(), fluid=True, style={'margin-bottom': '10px', 'margin-top': '10px'}),
+    dmc.Container(dmc.Title("Peer Comparison Summary", order=4), fluid=True, style={'margin-bottom': '10px'}),
+    dmc.Container(id='peerTBLRow', fluid=True),
+    dmc.Container(html.Hr(), fluid=True, style={'margin-bottom': '10px', 'margin-top': '10px'}),
 
-        dbc.Row(dmc.Text("Growth", fw=700, size="xl"), style={'margin-bottom': '10px'}),
-        dbc.Row(dcc.Dropdown(growth_items, 'Revenue Growth', id='dropdown3')),
-        dbc.Row(dcc.Graph(id="Graph3")),
+    dmc.Container(dmc.Title("Valuation", order=4), fluid=True, style={'margin-bottom': '10px', 'margin-top': '20px'}),
+    dmc.Container(dcc.Dropdown(valuation_items, 'Price to Earnings', id='dropdown1'), fluid=True),
+    dmc.Container(dcc.Graph(id="Graph1"), fluid=True),
 
-        dbc.Row(dmc.Text("Other Useful Metrics", fw=700, size="xl"), style={'margin-bottom': '10px'}),
-        dbc.Row(dcc.Dropdown(other_items, 'Debt to Equity', id='dropdown4')),
-        dbc.Row(dcc.Graph(id="Graph4")),
-    ]
-),color='primary',delay_hide=10,delay_show=15,spinner_style={"position":"absolute", "top":"20%"})
+    dmc.Container(dmc.Title("Efficiency / Margins", order=4), fluid=True, style={'margin-bottom': '10px', 'margin-top': '20px'}),
+    dmc.Container(dcc.Dropdown(efficiency_items, 'Return on Equity', id='dropdown2'), fluid=True),
+    dmc.Container(dcc.Graph(id="Graph2"), fluid=True),
 
+    dmc.Container(dmc.Title("Growth", order=4), fluid=True, style={'margin-bottom': '10px', 'margin-top': '20px'}),
+    dmc.Container(dcc.Dropdown(growth_items, 'Revenue Growth', id='dropdown3'), fluid=True),
+    dmc.Container(dcc.Graph(id="Graph3"), fluid=True),
 
+    dmc.Container(dmc.Title("Other Useful Metrics", order=4), fluid=True, style={'margin-bottom': '10px', 'margin-top': '20px'}),
+    dmc.Container(dcc.Dropdown(other_items, 'Debt to Equity', id='dropdown4'), fluid=True),
+    dmc.Container(dcc.Graph(id="Graph4"), fluid=True),
+
+])
 
 @callback(
      [Output("peerTBLRow", "children"),
@@ -193,8 +196,8 @@ def get_peer_tbl(ticker):
                 if col != 'Item':
                     left.loc[mask, col] = left.loc[mask, col].map(convert_to_percentage)
 
+        table = dmc.Table(data=genTBLContent(left), striped=True, withTableBorder=True, highlightOnHover=True, withColumnBorders=True,)
 
-        table = dbc.Table.from_dataframe(left, striped=True, bordered=True, hover=True)
         companies = left.columns.to_list()
         companies_shown = companies[1:]
 
@@ -202,9 +205,11 @@ def get_peer_tbl(ticker):
     except:
         alert = dmc.Alert(
             "Sorry! This data is not available.",
+            id="alert-peers1",
             title="Error!",
             color="red",
             withCloseButton=True,
+            hide=False
         ),
         return alert,{},{},{},{},{},{},[],[]
 
@@ -220,9 +225,10 @@ def get_peer_tbl(ticker):
      Input('peer4_dict', 'data'),
      Input('peer5_dict', 'data'),
      Input('peers', 'data'),
-     Input('dropdown1', 'value'),]
+     Input('dropdown1', 'value'),
+     Input("mantine-provider", "forceColorScheme")]
 )
-def create_chart1(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1):
+def create_chart1(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1, theme):
     try:
         dicts = [target,dict1,dict2,dict3,dict4,dict5]
         dfs = [pd.DataFrame(d) for d in dicts]
@@ -247,25 +253,35 @@ def create_chart1(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1):
         df_melted = df_melted.reset_index(drop=True)
 
         unique_items = df_melted['Item'].unique()
-        colors = ["blue", "red", "green", "goldenrod", "purple", "cyan"]
+        colors = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728","#17becf", "#9467bd"]
         valid_peers = [peer for peer in peers if peer in unique_items]
         color_discrete_map = {item: color for item, color in zip(valid_peers, colors)}
 
         fig = go.Figure(layout=dict(template='plotly'))
         fig = px.line(df_melted, x="Year", y="Value", color="Item", markers=True,
                       color_discrete_map=color_discrete_map)
-
+    except:
+        fig = go.Figure()
+    if theme == 'light':
         fig.update_layout(
             xaxis_title="Year",
             yaxis_title="Value",
             xaxis=dict(tickformat="%Y", nticks=5),
             yaxis=dict(title='', gridcolor='lightgray'),
-            plot_bgcolor = 'white',  # Set background color
-            paper_bgcolor = 'white',  # Set plot area background color
-            font_color = 'black',  # Set text color
+            plot_bgcolor='white',  # Set background color
+            paper_bgcolor='white',  # Set plot area background color
+            font_color='black',  # Set text color
         )
-    except:
-        fig = go.Figure()
+    else:
+        fig.update_layout(
+            xaxis_title="Year",
+            yaxis_title="Value",
+            xaxis=dict(tickformat="%Y", nticks=5, gridcolor='rgb(50, 50, 50)'),
+            yaxis=dict(title='', gridcolor='lightgray'),
+            plot_bgcolor='rgb(50, 50, 50)',  # Set background color
+            paper_bgcolor='rgb(50, 50, 50)',  # Set plot area background color
+            font_color='white',  # Set text color
+        )
     return fig
 
 
@@ -279,9 +295,10 @@ def create_chart1(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1):
      Input('peer4_dict', 'data'),
      Input('peer5_dict', 'data'),
      Input('peers', 'data'),
-     Input('dropdown2', 'value'),]
+     Input('dropdown2', 'value'),
+     Input("mantine-provider", "forceColorScheme")]
 )
-def create_chart2(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1):
+def create_chart2(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1,theme):
     try:
         dicts = [target,dict1,dict2,dict3,dict4,dict5]
         dfs = [pd.DataFrame(d) for d in dicts]
@@ -306,25 +323,36 @@ def create_chart2(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1):
         df_melted = df_melted.reset_index(drop=True)
 
         unique_items = df_melted['Item'].unique()
-        colors = ["blue", "red", "green", "goldenrod", "purple", "cyan"]
+        colors = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728","#17becf", "#9467bd"]
         valid_peers = [peer for peer in peers if peer in unique_items]
         color_discrete_map = {item: color for item, color in zip(valid_peers, colors)}
 
         fig = go.Figure(layout=dict(template='plotly'))
         fig = px.line(df_melted, x="Year", y="Value", color="Item", markers=True,
                       color_discrete_map=color_discrete_map)
+    except:
+        fig = go.Figure()
 
+    if theme == 'light':
         fig.update_layout(
             xaxis_title="Year",
             yaxis_title="Value",
             xaxis=dict(tickformat="%Y", nticks=5),
             yaxis=dict(title='', gridcolor='lightgray'),
-            plot_bgcolor = 'white',  # Set background color
-            paper_bgcolor = 'white',  # Set plot area background color
-            font_color = 'black',  # Set text color
+            plot_bgcolor='white',  # Set background color
+            paper_bgcolor='white',  # Set plot area background color
+            font_color='black',  # Set text color
         )
-    except:
-        fig = go.Figure()
+    else:
+        fig.update_layout(
+            xaxis_title="Year",
+            yaxis_title="Value",
+            xaxis=dict(tickformat="%Y", nticks=5, gridcolor='rgb(50, 50, 50)'),
+            yaxis=dict(title='', gridcolor='lightgray'),
+            plot_bgcolor='rgb(50, 50, 50)',  # Set background color
+            paper_bgcolor='rgb(50, 50, 50)',  # Set plot area background color
+            font_color='white',  # Set text color
+        )
     return fig
 
 
@@ -338,9 +366,10 @@ def create_chart2(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1):
      Input('peer4_dict', 'data'),
      Input('peer5_dict', 'data'),
      Input('peers', 'data'),
-     Input('dropdown3', 'value'),]
+     Input('dropdown3', 'value'),
+     Input("mantine-provider", "forceColorScheme")]
 )
-def create_chart3(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1):
+def create_chart3(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1,theme):
     try:
         dicts = [target,dict1,dict2,dict3,dict4,dict5]
         dfs = [pd.DataFrame(d) for d in dicts]
@@ -365,25 +394,36 @@ def create_chart3(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1):
         df_melted = df_melted.reset_index(drop=True)
 
         unique_items = df_melted['Item'].unique()
-        colors = ["blue", "red", "green", "goldenrod", "purple", "cyan"]
+        colors = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#17becf", "#9467bd"]
         valid_peers = [peer for peer in peers if peer in unique_items]
         color_discrete_map = {item: color for item, color in zip(valid_peers, colors)}
 
         fig = go.Figure(layout=dict(template='plotly'))
         fig = px.line(df_melted, x="Year", y="Value", color="Item", markers=True,
                       color_discrete_map=color_discrete_map)
+    except:
+        fig = go.Figure()
 
+    if theme == 'light':
         fig.update_layout(
             xaxis_title="Year",
             yaxis_title="Value",
             xaxis=dict(tickformat="%Y", nticks=5),
             yaxis=dict(title='', gridcolor='lightgray'),
-            plot_bgcolor = 'white',  # Set background color
-            paper_bgcolor = 'white',  # Set plot area background color
-            font_color = 'black',  # Set text color
+            plot_bgcolor='white',  # Set background color
+            paper_bgcolor='white',  # Set plot area background color
+            font_color='black',  # Set text color
         )
-    except:
-        fig = go.Figure()
+    else:
+        fig.update_layout(
+            xaxis_title="Year",
+            yaxis_title="Value",
+            xaxis=dict(tickformat="%Y", nticks=5, gridcolor='rgb(50, 50, 50)'),
+            yaxis=dict(title='', gridcolor='lightgray'),
+            plot_bgcolor='rgb(50, 50, 50)',  # Set background color
+            paper_bgcolor='rgb(50, 50, 50)',  # Set plot area background color
+            font_color='white',  # Set text color
+        )
     return fig
 
 
@@ -397,9 +437,10 @@ def create_chart3(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1):
      Input('peer4_dict', 'data'),
      Input('peer5_dict', 'data'),
      Input('peers', 'data'),
-     Input('dropdown4', 'value'),]
+     Input('dropdown4', 'value'),
+     Input("mantine-provider", "forceColorScheme")]
 )
-def create_chart4(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1):
+def create_chart4(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1,theme):
     try:
         dicts = [target,dict1,dict2,dict3,dict4,dict5]
         dfs = [pd.DataFrame(d) for d in dicts]
@@ -424,7 +465,7 @@ def create_chart4(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1):
         df_melted = df_melted.reset_index(drop=True)
 
         unique_items = df_melted['Item'].unique()
-        colors = ["blue", "red", "green", "goldenrod", "purple", "cyan"]
+        colors = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728","#17becf", "#9467bd"]
         valid_peers = [peer for peer in peers if peer in unique_items]
         color_discrete_map = {item: color for item, color in zip(valid_peers, colors)}
 
@@ -432,17 +473,29 @@ def create_chart4(target,dict1,dict2,dict3,dict4,dict5,peers,dropdown1):
         fig = px.line(df_melted, x="Year", y="Value", color="Item", markers=True,
                       color_discrete_map=color_discrete_map)
 
+    except:
+        fig = go.Figure()
+
+    if theme == 'light':
         fig.update_layout(
             xaxis_title="Year",
             yaxis_title="Value",
             xaxis=dict(tickformat="%Y", nticks=5),
             yaxis=dict(title='', gridcolor='lightgray'),
-            plot_bgcolor = 'white',  # Set background color
-            paper_bgcolor = 'white',  # Set plot area background color
-            font_color = 'black',  # Set text color
+            plot_bgcolor='white',  # Set background color
+            paper_bgcolor='white',  # Set plot area background color
+            font_color='black',  # Set text color
         )
-    except:
-        fig = go.Figure()
+    else:
+        fig.update_layout(
+            xaxis_title="Year",
+            yaxis_title="Value",
+            xaxis=dict(tickformat="%Y", nticks=5, gridcolor='rgb(50, 50, 50)'),
+            yaxis=dict(title='', gridcolor='lightgray'),
+            plot_bgcolor='rgb(50, 50, 50)',  # Set background color
+            paper_bgcolor='rgb(50, 50, 50)',  # Set plot area background color
+            font_color='white',  # Set text color
+        )
     return fig
 
 
@@ -461,13 +514,16 @@ def create_desc_tbl(peers,ticker):
         other_rows = df[df['symbol'] != ticker[0:-3]].sort_values(by='symbol')
         df = pd.concat([first_row, other_rows], ignore_index=True)
         df.columns = [col.capitalize() for col in df.columns]
-        table = dbc.Table.from_dataframe(df)
+        #table = dbc.Table.from_dataframe(df)
+        table = dmc.Table(data=genTBLContent(df), highlightOnHover=True,)
         return table
     except:
         alert = dmc.Alert(
             "Sorry! This data is not available.",
+            id="alert-peers2",
             title="Error!",
             color="red",
             withCloseButton=True,
+            hide=False
         ),
         return alert

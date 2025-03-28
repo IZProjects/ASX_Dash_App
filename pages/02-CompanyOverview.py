@@ -1,12 +1,12 @@
 import dash
-from dash import dcc, html, Input, Output, State, callback, clientside_callback
-import dash_bootstrap_components as dbc
+from dash import dcc, html, Input, Output, callback
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 from io import StringIO
 import dash_mantine_components as dmc
 from mysql_connect_funcs import get_df_tblName, get_df_query
+from utils.df_to_mantineTBL import genTBLContent
 
 
 pd.options.mode.chained_assignment = None  # default='warn'
@@ -84,82 +84,75 @@ button_group2 = dmc.SegmentedControl(
     size='md'
 )
 
-# Layout
-layout = dbc.Spinner(dbc.Container([
+
+layout = dmc.Box([
     dcc.Store(id="dict_daily", storage_type='session', data={}),
     dcc.Store(id="dict_weekly", storage_type='session', data={}),
     dcc.Store(id="dict_monthly", storage_type='session', data={}),
     dcc.Store(id="announcementsTBLStore", storage_type='session', data={}),
 
-    dmc.Alert(
-        "Sorry! Price data is not available for this stock  :(",
-        title="Error!",
-        id="alert-realtimePrice",
-        color="red",
-        withCloseButton=True,
-    ),
+    dmc.Grid([
+        dmc.GridCol([dmc.Grid(dmc.Title(id='stock_name', order=2), style={'margin-bottom': '10px'}),
+                     dmc.Grid(
+                         dmc.Group([
+                             dmc.Badge(id='currency_badge', color="indigo", className="me-1"),
+                             dmc.Badge(id='sector_badge', color="red", className="me-1"),
+                             dmc.Badge(id='industry_badge', color="violet", className="me-1"),
+                             dmc.Badge(id='category_badge', color="gray", className="me-1")
+                         ], gap='sm')
+                     )
+                     ], span='content'),
+        dmc.GridCol([dmc.Grid(dmc.Title(id='stock_price', order=2), style={'margin-bottom': '10px'}),
+                     dmc.Grid(dmc.Text(id="price_change", size='md'), id='price_change_row')],
+                    span='content', offset='auto'),
+    ], justify='space-between',
+        style={'margin-bottom': '20px', 'margin-top': '20px', 'margin-left': '20px', 'margin-right': '20px'}),
 
-    dbc.Row([
-        dbc.Col([dbc.Row(html.H2(id='stock_name')),
-                 dbc.Row(html.Span([
-                     dbc.Badge(id='currency_badge', color="primary", className="me-1"),
-                     dbc.Badge(id='sector_badge', color="warning", className="me-1"),
-                     dbc.Badge(id='industry_badge', color="danger", className="me-1"),
-                     dbc.Badge(id='category_badge', color="dark", className="me-1")],))
-                 ], width=10),
-        dbc.Col([dbc.Row(html.H2(id='stock_price')),
-                 dbc.Row(html.P(id="price_change"),id='price_change_row')],
-                width=2, style={'text-align': 'right'}),
-    ], style={'margin-bottom': '10px'}),
+    dmc.Container(html.Hr(), fluid=True),
 
-    dbc.Row(html.Hr()),
+    dmc.Container([
+        dmc.Card([
+            dmc.Group([button_group1,button_group2,dmc.Button("Show/Hide", id='collapse-button', color='indigo', size='md')], gap='md', justify='space-between', className="justify-content-between"),
 
-    dbc.Row([dbc.Card([
-            dbc.CardHeader(dbc.Stack([button_group1,
-                                              button_group2,
-                                              dmc.Button("Show/Hide", id='collapse-button', color='indigo', size='md')],
-                                              direction="horizontal", gap=3, className="justify-content-between")
-
-            ),
-            dbc.Collapse(
-                dbc.CardBody([html.H4(id='chart_heading'),
-                              html.Div([html.P("Return over the period: ", style={'display': 'inline'}),
-                                        html.P(id='period_return'),
+            dmc.Collapse(
+                dmc.Container([dmc.Title(id='chart_heading', order=4, style={'margin-top': '30px'}),
+                              html.Div([dmc.Text("Return over the period: ", style={'display': 'inline'}),
+                                        dmc.Text(id='period_return'),
                                         ]),
                               dcc.Graph(id='price_chart1'),
                               dcc.Graph(id='volume_chart1', style={'height': '250px'})
-                              ]),
-                id="collapse", is_open=True)
-            ])
-        ],
-        style={'margin-bottom': '20px'}),
+                              ], fluid=True),
+                id="collapse", opened=True)
+        ],withBorder=True, radius="md",)
+    ],fluid=True, style={'margin-bottom': '20px'}),
 
-    dbc.Row([
-        dbc.Card(
-            dbc.CardBody([
-                dbc.Row([
-                    dbc.Col(id='table1', width=4),
-                    dbc.Col(id='table2', width=4),
-                    dbc.Col(id='table3', width=4)
-                ]),
-                dbc.Row([
-                    dbc.Col(id='table4', width=4),
-                    dbc.Col(id='table5', width=4),
-                    dbc.Col(id='table6', width=4)
-                ]),
-            ]))
-    ], style={'margin-bottom': '20px'}),
+    dmc.Container([
+        dmc.Card([
+            dmc.Grid([
+                dmc.GridCol(id='sumtable1', span=4),
+                dmc.GridCol(id='sumtable2', span=4),
+                dmc.GridCol(id='sumtable3', span=4)
+            ]),
+            dmc.Grid([
+                dmc.GridCol(id='sumtable4', span=4),
+                dmc.GridCol(id='sumtable5', span=4),
+                dmc.GridCol(id='sumtable6', span=4)
+            ]),
+        ], withBorder=True, radius="md",)
+    ], fluid=True, style={'margin-bottom': '20px'}),
 
-    dbc.Row([dbc.Card(dbc.CardBody([dmc.Text("About the Company", fw=700, size='xl'),
-                                    html.P(id='description'), dbc.Row(id='peter_lynch')]))], style={'margin-bottom': '25px'}),
+    dmc.Container([dmc.Card([dmc.Text("About the Company", fw=700, size='xl'),
+                                    dmc.Text(id='description'), dmc.CardSection(dmc.Container(id='peter_lynch', fluid=True))], withBorder=True, radius="md")],
+            style={'margin-bottom': '25px'}, fluid=True),
 
-]),color="primary",delay_hide=10,delay_show=15,spinner_style={"position":"absolute", "top":"20%"})
+
+], style={'margin-left': '30px'})
+
 
 @callback(
     [Output("stock_price", "children"),
     Output("price_change", "children"),
-    Output("price_change_row", "style"),
-     Output("alert-realtimePrice", "hide")],
+    Output("price_change_row", "style")],
     Input("ticker", "data"),
 )
 def get_prices(ticker):
@@ -182,17 +175,17 @@ def get_prices(ticker):
         else:
             change_line = str(change) + ' (' + str(round(float(change_p), 2)) + '%)'
             style = {'color': 'red'}
-        return price, change_line, style, True
+        return price, change_line, style
     except:
-        return '', '', {}, False
+        return '', '', {}
 
 @callback(
-    [Output("table1", "children"),
-     Output("table2", "children"),
-     Output("table3", "children"),
-     Output("table4", "children"),
-     Output("table5", "children"),
-     Output("table6", "children"),],
+    [Output("sumtable1", "children"),
+     Output("sumtable2", "children"),
+     Output("sumtable3", "children"),
+     Output("sumtable4", "children"),
+     Output("sumtable5", "children"),
+     Output("sumtable6", "children"),],
     Input("ticker", "data"),
 )
 def get_tbl(ticker):
@@ -220,12 +213,13 @@ def get_tbl(ticker):
     df6 = df[15:18]
     df6.columns = ['Margins', '']
 
-    tbl1 = dbc.Table.from_dataframe(df1, borderless=False, hover=True, size='sm', className='summary_table')
-    tbl2 = dbc.Table.from_dataframe(df2, borderless=False, hover=True, size='sm', className='summary_table')
-    tbl3 = dbc.Table.from_dataframe(df3, borderless=False, hover=True, size='sm', className='summary_table')
-    tbl4 = dbc.Table.from_dataframe(df4, borderless=False, hover=True, size='sm', className='summary_table')
-    tbl5 = dbc.Table.from_dataframe(df5, borderless=False, hover=True, size='sm', className='summary_table')
-    tbl6 = dbc.Table.from_dataframe(df6, borderless=False, hover=True, size='sm', className='summary_table')
+    tbl1 = dmc.Table(data=genTBLContent(df1), highlightOnHover=True, className='summary_table')
+    tbl2 = dmc.Table(data=genTBLContent(df2), highlightOnHover=True, className='summary_table')
+    tbl3 = dmc.Table(data=genTBLContent(df3), highlightOnHover=True, className='summary_table')
+    tbl4 = dmc.Table(data=genTBLContent(df4), highlightOnHover=True, className='summary_table')
+    tbl5 = dmc.Table(data=genTBLContent(df5), highlightOnHover=True, className='summary_table')
+    tbl6 = dmc.Table(data=genTBLContent(df6), highlightOnHover=True, className='summary_table')
+
     return tbl1,tbl2,tbl3,tbl4,tbl5,tbl6
 
 
@@ -272,9 +266,9 @@ def print_tags(metadata,ticker):
     return name,sector,industry,currency,category
 
 @callback(
-    Output("collapse", "is_open"),
+    Output("collapse", "opened"),
     [Input("collapse-button", "n_clicks"),
-     Input("collapse", "is_open")],
+     Input("collapse", "opened")],
 )
 def toggle_collapse(n, is_open):
     if n:
@@ -314,9 +308,10 @@ def sql_get_prices(ticker):
      Input("dict_weekly", "data"),
      Input("dict_monthly", "data"),
      Input(component_id='radios_tf', component_property='value'),
-     Input(component_id='radios_type', component_property='value')]
+     Input(component_id='radios_type', component_property='value'),
+     Input("mantine-provider", "forceColorScheme")]
 )
-def update_graph(dict_daily,dict_weekly,dict_monthly, value1, value2):
+def update_graph(dict_daily,dict_weekly,dict_monthly, value1, value2, theme):
     df_daily = pd.DataFrame.from_dict(dict_daily)
     df_weekly = pd.DataFrame.from_dict(dict_weekly)
     df_monthly = pd.DataFrame.from_dict(dict_monthly)
@@ -362,37 +357,67 @@ def update_graph(dict_daily,dict_weekly,dict_monthly, value1, value2):
         else:
             fig1 = px.line(filtered_df, x='date', y='close', markers=False, color_discrete_sequence=['gold'])
 
-        # customise fig
-        fig1.update_layout(
-            plot_bgcolor='white',  # Set background color
-            paper_bgcolor='white',  # Set plot area background color
-            font_color='black',  # Set text color
-            title='',  # Set title
-            xaxis=dict(title=''),  # Set X-axis title and grid color
-            yaxis=dict(title='', gridcolor='lightgray'),  # Set Y-axis title and grid color
-            margin=dict(l=40, r=40, t=40, b=40),  # Add margin
-            xaxis_ticks='outside',  # Place X-axis ticks outside
-            xaxis_tickcolor='lightgray',  # Set X-axis tick color
-            yaxis_ticks='outside',  # Place Y-axis ticks outside
-            yaxis_tickcolor='lightgray',  # Set Y-axis tick color
-            xaxis_rangeslider_visible=False
-        )
+        if theme == 'light':
+            fig1.update_layout(
+                plot_bgcolor='white',  # Set background color
+                paper_bgcolor='white',  # Set plot area background color
+                font_color='black',  # Set text color
+                title='',  # Set title
+                xaxis=dict(title='',),  # Set X-axis title and grid color
+                yaxis=dict(title='', gridcolor='lightgray'),  # Set Y-axis title and grid color
+                margin=dict(l=40, r=40, t=40, b=40),  # Add margin
+                xaxis_ticks='outside',  # Place X-axis ticks outside
+                xaxis_tickcolor='lightgray',  # Set X-axis tick color
+                yaxis_ticks='outside',  # Place Y-axis ticks outside
+                yaxis_tickcolor='lightgray',  # Set Y-axis tick color
+                xaxis_rangeslider_visible=False
+            )
+        else:
+            fig1.update_layout(
+                plot_bgcolor='rgb(50, 50, 50)',  # Set background color
+                paper_bgcolor='rgb(50, 50, 50)',  # Set plot area background color
+                font_color='white',  # Set text color
+                title='',  # Set title
+                xaxis=dict(title='', gridcolor='rgb(50, 50, 50)'),  # Set X-axis title and grid color
+                yaxis=dict(title='', gridcolor='lightgray'),  # Set Y-axis title and grid color
+                margin=dict(l=40, r=40, t=40, b=40),  # Add margin
+                xaxis_ticks='outside',  # Place X-axis ticks outside
+                xaxis_tickcolor='lightgray',  # Set X-axis tick color
+                yaxis_ticks='outside',  # Place Y-axis ticks outside
+                yaxis_tickcolor='lightgray',  # Set Y-axis tick color
+                xaxis_rangeslider_visible=False
+            )
 
         fig2 = px.bar(filtered_df, x='date', y='volume', color_discrete_sequence=['gold'])
 
-        fig2.update_layout(
-            plot_bgcolor='white',  # Set background color
-            paper_bgcolor='white',  # Set plot area background color
-            font_color='black',  # Set text color
-            title=None,  # Set title
-            xaxis=dict(title=''),  # Set X-axis title and grid color
-            yaxis=dict(title='', gridcolor='lightgray'),  # Set Y-axis title and grid color
-            margin=dict(l=40, r=40, t=40, b=40),  # Add margin
-            xaxis_ticks='outside',  # Place X-axis ticks outside
-            xaxis_tickcolor='lightgray',  # Set X-axis tick color
-            yaxis_ticks='outside',  # Place Y-axis ticks outside
-            yaxis_tickcolor='lightgray',  # Set Y-axis tick color
-        )
+        if theme == 'light':
+            fig2.update_layout(
+                plot_bgcolor='white',  # Set background color
+                paper_bgcolor='white',  # Set plot area background color
+                font_color='black',  # Set text color
+                title=None,  # Set title
+                xaxis=dict(title=''),  # Set X-axis title and grid color
+                yaxis=dict(title='', gridcolor='lightgray'),  # Set Y-axis title and grid color
+                margin=dict(l=40, r=40, t=40, b=40),  # Add margin
+                xaxis_ticks='outside',  # Place X-axis ticks outside
+                xaxis_tickcolor='lightgray',  # Set X-axis tick color
+                yaxis_ticks='outside',  # Place Y-axis ticks outside
+                yaxis_tickcolor='lightgray',  # Set Y-axis tick color
+            )
+        else:
+            fig2.update_layout(
+                plot_bgcolor='rgb(50, 50, 50)',  # Set background color
+                paper_bgcolor='rgb(50, 50, 50)',  # Set plot area background color
+                font_color='white',  # Set text color
+                title=None,  # Set title
+                xaxis=dict(title='', gridcolor='rgb(50, 50, 50)'),  # Set X-axis title and grid color
+                yaxis=dict(title='', gridcolor='lightgray'),  # Set Y-axis title and grid color
+                margin=dict(l=40, r=40, t=40, b=40),  # Add margin
+                xaxis_ticks='outside',  # Place X-axis ticks outside
+                xaxis_tickcolor='lightgray',  # Set X-axis tick color
+                yaxis_ticks='outside',  # Place Y-axis ticks outside
+                yaxis_tickcolor='lightgray',  # Set Y-axis tick color
+            )
         return fig1, fig2, change_pct, change_style
 
     except:
@@ -423,7 +448,7 @@ def print_peter_lynch(ticker):
             tbltsv = tbltsv.dropna()
             tbltsv = tbltsv.drop(0).reset_index(drop=True)
             tbltsv.columns = [''] * len(tbltsv.columns)
-            ctbl = dbc.Table.from_dataframe(tbltsv, bordered=False, hover=True, className='first_col_bold_tbl')
+            ctbl = dmc.Table(data=genTBLContent(tbltsv), highlightOnHover=True, className='first_col_bold_tbl')
             return ctbl
         except:
             return ''
