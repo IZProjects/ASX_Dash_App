@@ -91,7 +91,7 @@ layout = dmc.Box([
     dcc.Store(id="dict_monthly", storage_type='session', data={}),
     dcc.Store(id="announcementsTBLStore", storage_type='session', data={}),
 
-    dmc.Box(dmc.Grid([
+    dmc.Container(dmc.Grid([
         dmc.GridCol([dmc.Grid(dmc.Title(id='stock_name', order=2), style={'margin-bottom': '10px'}),
                      dmc.Grid(
                          dmc.Group([
@@ -106,7 +106,7 @@ layout = dmc.Box([
                      dmc.Grid(dmc.Text(id="price_change", size='md'), id='price_change_row')],
                     span='content', offset='auto'),
     ], justify='space-between',
-        style={'margin-bottom': '20px', 'margin-top': '20px', 'margin-left': '20px', 'margin-right': '20px'})),
+        style={'margin-bottom': '20px', 'margin-top': '20px', 'margin-left': '20px', 'margin-right': '20px'}), fluid=True),
 
     dmc.Container(html.Hr(), fluid=True),
 
@@ -126,7 +126,7 @@ layout = dmc.Box([
         ],withBorder=True, radius="md",)
     ],fluid=True, style={'margin-bottom': '20px'}),
 
-    dmc.Container([
+    dmc.Paper([
         dmc.Card([
             dmc.Grid([
                 dmc.GridCol(id='sumtable1', span=4),
