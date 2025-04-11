@@ -126,20 +126,7 @@ layout = dmc.Box([
         ],withBorder=True, radius="md",)
     ],fluid=True, style={'margin-bottom': '20px'}),
 
-"""    dmc.Container([
-        dmc.Card([
-            dmc.Grid([
-                dmc.GridCol(id='sumtable1', span=4),
-                dmc.GridCol(id='sumtable2', span=4),
-                dmc.GridCol(id='sumtable3', span=4)
-            ]),
-            dmc.Grid([
-                dmc.GridCol(id='sumtable4', span=4),
-                dmc.GridCol(id='sumtable5', span=4),
-                dmc.GridCol(id='sumtable6', span=4)
-            ]),
-        ], withBorder=True, radius="md",)
-    ], fluid=True, style={'margin-bottom': '20px'}),"""
+
 
     dmc.Paper([
         dmc.Grid([
