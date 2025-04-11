@@ -91,7 +91,7 @@ layout = dmc.Box([
     dcc.Store(id="dict_monthly", storage_type='session', data={}),
     dcc.Store(id="announcementsTBLStore", storage_type='session', data={}),
 
-    dmc.Container(dmc.Grid([
+    dmc.Grid([
         dmc.GridCol([dmc.Grid(dmc.Title(id='stock_name', order=2), style={'margin-bottom': '10px'}),
                      dmc.Grid(
                          dmc.Group([
@@ -106,7 +106,7 @@ layout = dmc.Box([
                      dmc.Grid(dmc.Text(id="price_change", size='md'), id='price_change_row')],
                     span='content', offset='auto'),
     ], justify='space-between',
-        style={'margin-bottom': '20px', 'margin-top': '20px', 'margin-left': '20px', 'margin-right': '20px'}), fluid=True),
+        style={'margin-bottom': '20px', 'margin-top': '20px', 'margin-left': '20px', 'margin-right': '20px'}),
 
     dmc.Container(html.Hr(), fluid=True),
 
@@ -126,7 +126,7 @@ layout = dmc.Box([
         ],withBorder=True, radius="md",)
     ],fluid=True, style={'margin-bottom': '20px'}),
 
-    dmc.Paper([
+"""    dmc.Container([
         dmc.Card([
             dmc.Grid([
                 dmc.GridCol(id='sumtable1', span=4),
@@ -139,7 +139,20 @@ layout = dmc.Box([
                 dmc.GridCol(id='sumtable6', span=4)
             ]),
         ], withBorder=True, radius="md",)
-    ], fluid=True, style={'margin-bottom': '20px'}),
+    ], fluid=True, style={'margin-bottom': '20px'}),"""
+
+    dmc.Paper([
+        dmc.Grid([
+            dmc.GridCol(id='sumtable1', span=4),
+            dmc.GridCol(id='sumtable2', span=4),
+            dmc.GridCol(id='sumtable3', span=4)
+        ]),
+        dmc.Grid([
+            dmc.GridCol(id='sumtable4', span=4),
+            dmc.GridCol(id='sumtable5', span=4),
+            dmc.GridCol(id='sumtable6', span=4)
+        ]),
+    ], withBorder=True, style={'margin-bottom': '20px'}),
 
     dmc.Container([dmc.Card([dmc.Text("About the Company", fw=700, size='xl'),
                                     dmc.Text(id='description'), dmc.CardSection(dmc.Container(id='peter_lynch', fluid=True))], withBorder=True, radius="md")],
