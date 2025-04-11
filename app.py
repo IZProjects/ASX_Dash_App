@@ -30,7 +30,7 @@ layout = dmc.AppShell(
         dcc.Store(id="ticker", storage_type='session', data={}),
         dcc.Store(id='single_ticker_metadata', storage_type='session', data={}),
         dmc.AppShellHeader(header, style={'padding-left': '20px', 'padding-right': '20px'}),
-        dmc.AppShellNavbar(sidebar, style={'padding-left': '10px', 'padding-right': '10px', 'margin-top': '20px'}),
+        dmc.AppShellNavbar(sidebar, style={'padding-left': '10px', 'padding-right': '10px', 'padding-top': '20px'}),
         dcc.Loading([
             dmc.AppShellMain(page_container),
         ], style={"position":"absolute", "top":"20%"})
@@ -54,6 +54,20 @@ clientside_callback(
     State("appshell", "navbar"),
 )
 
+clientside_callback(
+    """
+    function(path, opened) {
+        if (opened) {
+            return !opened;
+        }
+        return opened;
+    }
+    """,
+    Output("burger-button", "opened"),
+    Input("url", "pathname"),
+    State("burger-button", "opened"),
+    prevent_initial_call=True
+)
 
 clientside_callback(
     ClientsideFunction(
