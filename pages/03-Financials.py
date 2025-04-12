@@ -95,6 +95,7 @@ export_btn = dmc.Button("Export", id='exportBtn', color="gray")
 export_btn2 = dmc.Button("Export", id='exportBtn2', color="gray")
 
 
+
 layout = dmc.Box([
     dmc.Grid([
         dmc.GridCol([dmc.Grid(dmc.Title(id='stock_name', order=2), style={'margin-bottom': '10px'}),
@@ -106,7 +107,7 @@ layout = dmc.Box([
                              dmc.Badge(id='category_badge', color="gray", className="me-1")
                          ], gap='sm')
                      )
-                     ], span={"base": 8, "md": 12}),
+                     ], span={"base": 8, "md": 10}),
         dmc.GridCol([dmc.Grid(dmc.Title(id='stock_price', order=2), style={'margin-bottom': '10px'}),
                      dmc.Grid(dmc.Text(id="price_change", size='md'), id='price_change_row')],
                     span='content', offset='auto'),
@@ -144,7 +145,7 @@ layout = dmc.Box([
      Input(component_id='radios_units', component_property='value'),
      Input(component_id='radios_direction', component_property='value'),
      Input(component_id="ticker", component_property="data"),
-     Input("mantine-provider", "forceColorScheme")]
+     Input("mantine-provider", "forceColorScheme"),]
 )
 def create_table(statement, period, units, direction, ticker, theme):
     try:

@@ -82,7 +82,7 @@ layout = dmc.Box([
                              dmc.Badge(id='category_badge', color="gray", className="me-1")
                          ], gap='sm')
                      )
-                     ], span={"base": 8, "md": 12}),
+                     ], span={"base": 8, "md": 10}),
         dmc.GridCol([dmc.Grid(dmc.Title(id='stock_price', order=2), style={'margin-bottom': '10px'}),
                      dmc.Grid(dmc.Text(id="price_change", size='md'), id='price_change_row')],
                     span='content', offset='auto'),
