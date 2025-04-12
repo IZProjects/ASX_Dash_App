@@ -29,14 +29,14 @@ layout = dmc.AppShell(
         dcc.Location(id='url', refresh=True),
         dcc.Store(id="ticker", storage_type='session', data={}),
         dcc.Store(id='single_ticker_metadata', storage_type='session', data={}),
-        dmc.AppShellHeader(header, style={'padding-left': '20px', 'padding-right': '20px', 'padding-top': '10px'}),
+        dmc.AppShellHeader(header, style={'padding-left': '20px', 'padding-right': '20px'}),
         dmc.AppShellNavbar(sidebar, style={'padding-left': '10px', 'padding-right': '10px', 'padding-top': '20px'}),
         dcc.Loading([
             dmc.AppShellMain(page_container),
         ], style={"position":"absolute", "top":"20%"})
     ],
     header={"height": 48},
-    navbar={"width": 250, "breakpoint": "sm", "collapsed": {"mobile": True}},
+    navbar={"width": 250, "breakpoint": "md", "collapsed": {"mobile": True}},
     padding="md",
     id="appshell",
 )

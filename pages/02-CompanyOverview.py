@@ -7,7 +7,7 @@ from io import StringIO
 import dash_mantine_components as dmc
 from mysql_connect_funcs import get_df_tblName, get_df_query
 from utils.df_to_mantineTBL import genTBLContent
-
+import numpy as np
 
 pd.options.mode.chained_assignment = None  # default='warn'
 
@@ -101,7 +101,7 @@ layout = dmc.Box([
                              dmc.Badge(id='category_badge', color="gray", className="me-1")
                          ], gap='sm')
                      )
-                     ], span='content'),
+                     ], span={"base": 8, "md": 12}),
         dmc.GridCol([dmc.Grid(dmc.Title(id='stock_price', order=2), style={'margin-bottom': '10px'}),
                      dmc.Grid(dmc.Text(id="price_change", size='md'), id='price_change_row')],
                     span='content', offset='auto'),
@@ -126,20 +126,24 @@ layout = dmc.Box([
         ],withBorder=True, radius="md",)
     ],fluid=True, style={'margin-bottom': '20px'}),
 
+dmc.Container([
+        dmc.Card([
+            dmc.Grid([
+                dmc.GridCol(id='sumtable1', span=4),
+                dmc.GridCol(id='sumtable2', span=4),
+                dmc.GridCol(id='sumtable3', span=4)
+            ]),
+            dmc.Grid([
+                dmc.GridCol(id='sumtable4', span=4),
+                dmc.GridCol(id='sumtable5', span=4),
+                dmc.GridCol(id='sumtable6', span=4)
+            ]),
+        ], withBorder=True, radius="md",)
+    ], fluid=True, style={'margin-bottom': '20px'}, visibleFrom='md'),
 
-
-    dmc.Paper([
-        dmc.Grid([
-            dmc.GridCol(id='sumtable1', span=4),
-            dmc.GridCol(id='sumtable2', span=4),
-            dmc.GridCol(id='sumtable3', span=4)
-        ]),
-        dmc.Grid([
-            dmc.GridCol(id='sumtable4', span=4),
-            dmc.GridCol(id='sumtable5', span=4),
-            dmc.GridCol(id='sumtable6', span=4)
-        ]),
-    ], withBorder=True, style={'margin-bottom': '20px'}),
+dmc.Container([
+        dmc.Card(id='sumtable_mobile', withBorder=True, radius="md",)
+    ], fluid=True, style={'margin-bottom': '20px'}, hiddenFrom='md'),
 
     dmc.Container([dmc.Card([dmc.Text("About the Company", fw=700, size='xl'),
                                     dmc.Text(id='description'), dmc.CardSection(dmc.Container(id='peter_lynch', fluid=True))], withBorder=True, radius="md")],
@@ -185,7 +189,8 @@ def get_prices(ticker):
      Output("sumtable3", "children"),
      Output("sumtable4", "children"),
      Output("sumtable5", "children"),
-     Output("sumtable6", "children"),],
+     Output("sumtable6", "children"),
+     Output("sumtable_mobile", "children"),],
     Input("ticker", "data"),
 )
 def get_tbl(ticker):
@@ -212,6 +217,9 @@ def get_tbl(ticker):
     df5 = convert_to_percentage(df5)
     df6 = df[15:18]
     df6.columns = ['Margins', '']
+    df_mob = pd.DataFrame(np.vstack([df1.to_numpy(), df2.to_numpy(), df3.to_numpy(),
+                                     df4.to_numpy(), df5.to_numpy(), df6.to_numpy()]))
+    df_mob.columns = ['Summary', '']
 
     tbl1 = dmc.Table(data=genTBLContent(df1), highlightOnHover=True, className='summary_table')
     tbl2 = dmc.Table(data=genTBLContent(df2), highlightOnHover=True, className='summary_table')
@@ -219,8 +227,10 @@ def get_tbl(ticker):
     tbl4 = dmc.Table(data=genTBLContent(df4), highlightOnHover=True, className='summary_table')
     tbl5 = dmc.Table(data=genTBLContent(df5), highlightOnHover=True, className='summary_table')
     tbl6 = dmc.Table(data=genTBLContent(df6), highlightOnHover=True, className='summary_table')
+    tbl_mob = dmc.Table(data=genTBLContent(df_mob), highlightOnHover=True, className='summary_table')
 
-    return tbl1,tbl2,tbl3,tbl4,tbl5,tbl6
+
+    return tbl1,tbl2,tbl3,tbl4,tbl5,tbl6,tbl_mob
 
 
 @callback(

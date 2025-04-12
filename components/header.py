@@ -2,7 +2,7 @@ from dash import dcc, callback, Input, Output
 import dash_mantine_components as dmc
 from utils.helpers import iconify
 
-burger = dmc.Burger(id="burger-button", size="sm", hiddenFrom="sm", opened=False),
+burger = dmc.Burger(id="burger-button", size="sm", hiddenFrom="md", opened=False),
 
 dropdown = dcc.Dropdown(id="my-dynamic-dropdown", placeholder="Search...", className='Dropdown-2')
 
@@ -28,7 +28,7 @@ menu = dmc.Menu(
             ]
         )
 
-title = dmc.Title("ASX Dashboard", c="blue", visibleFrom='sm')
+title = dmc.Title("ASX Dashboard", c="blue", visibleFrom='md')
 
 header = dmc.Grid(
     children=[
@@ -41,13 +41,3 @@ header = dmc.Grid(
     justify="space-around",
     align="center",
 )
-
-"""@callback(
-    Output(component_id="my-dynamic-dropdown", component_property='className'),
-     Input("mantine-provider", "forceColorScheme")
-)
-def change_dropdown_color(theme):
-    if theme == "light":
-        return 'dropdown_light'
-    else:
-        return 'dropdown_dark'"""
