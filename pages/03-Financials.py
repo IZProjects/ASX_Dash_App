@@ -109,7 +109,8 @@ layout = dmc.Box([
                      )
                      ], span={"base": 8, "md": 10}),
         dmc.GridCol([dmc.Grid(dmc.Title(id='stock_price', order=2), style={'margin-bottom': '10px'}),
-                     dmc.Grid(dmc.Text(id="price_change", size='md'), id='price_change_row')],
+                     dmc.Grid(dmc.Text(id="price_change", size='md'), id='price_change_row', style={'margin-bottom': '10px'}),
+                     dmc.Grid(dmc.Text("Delayed price data ", style={"fontSize": 11}, c="gray"))],
                     span='content', offset='auto'),
     ], justify='space-between',
         style={'margin-bottom': '20px', 'margin-top': '20px', 'margin-left': '20px', 'margin-right': '20px'}),
@@ -132,7 +133,17 @@ layout = dmc.Box([
             dmc.CardSection(dmc.Container(id='table2_row', fluid=True, style={'margin-bottom': '20px'})),
 
         ], withBorder=True)
-    ], fluid=True)
+    ], fluid=True),
+
+    dmc.Container(html.Hr(), fluid=True, style={'margin-top': '50px', 'margin-bottom': '20px'}),
+
+    dmc.Container(dmc.Text("""All information and data presented on this website are for informational purposes only. 
+                                    We are not financial advisers and none of the content on our website should be interpreted as financial advice. 
+                                    Nothing on our website is intended to imply a recommendation or opinion about a financial product. 
+                                    Before you make an investment decision based on any of the information contained on our website, 
+                                    please consult a qualified financial adviser or stockbroker. 
+                                    We do not guarentee the accuracy or completeness of any of the information provided.""",
+                           size='xs', c='gray'), fluid=True),
 
 ])
 
@@ -447,9 +458,9 @@ def create_table(statement, period, units, direction, ticker, theme):
 
 
         if direction == 'Descending':
-            df_final = df
-        else:
             df_final = df_reversed
+        else:
+            df_final = df
 
         table = dash_table.DataTable(
             id='table2',

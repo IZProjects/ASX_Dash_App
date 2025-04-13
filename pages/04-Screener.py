@@ -177,6 +177,14 @@ layout = dmc.Box([
     dmc.Group([modal, dmc.Button('Submit', id='submit_button', color='indigo', variant='outline')],
                gap='md', justify='space-between',className="justify-content-between"),
     dmc.Container(id='output-container', fluid=True, style={'margin-top': '20px'}),
+    dmc.Container(html.Hr(), fluid=True, style={'margin-top': '50px', 'margin-bottom': '20px'}),
+    dmc.Container(dmc.Text("""All information and data presented on this website are for informational purposes only. 
+                                    We are not financial advisers and none of the content on our website should be interpreted as financial advice. 
+                                    Nothing on our website is intended to imply a recommendation or opinion about a financial product. 
+                                    Before you make an investment decision based on any of the information contained on our website, 
+                                    please consult a qualified financial adviser or stockbroker. 
+                                    We do not guarentee the accuracy or completeness of any of the information provided.""",
+                           size='xs', c='gray'), fluid=True),
 ])
 
 
