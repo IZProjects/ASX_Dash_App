@@ -241,12 +241,7 @@ layout = dmc.Box([
     dmc.Container(children=table_growthStory, style={'margin-bottom': '20px'}, fluid=True),
 
     dmc.Container(html.Hr(), fluid=True, style={'margin-top': '50px', 'margin-bottom': '20px'}),
-    dmc.Container(dmc.Text("""All information and data presented on this website are for informational purposes only. 
-                                        We are not financial advisers and none of the content on our website should be interpreted as financial advice. 
-                                        Nothing on our website is intended to imply a recommendation or opinion about a financial product. 
-                                        Before you make an investment decision based on any of the information contained on our website, 
-                                        please consult a qualified financial adviser or stockbroker. 
-                                        We do not guarentee the accuracy or completeness of any of the information provided.""", size='xs', c='gray'), fluid=True),
+    dmc.Group([dcc.Markdown(f'[Terms and Conditions](/toc)'),dcc.Markdown(f'[Privacy Policy](/privacy-policy)')], gap='md', justify='flex-end'),
 ])
 
 @callback(

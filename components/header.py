@@ -4,7 +4,7 @@ from utils.helpers import iconify
 
 burger = dmc.Burger(id="burger-button", size="sm", hiddenFrom="md", opened=False),
 
-dropdown = dcc.Dropdown(id="my-dynamic-dropdown", placeholder="Search...", className='Dropdown-2')
+dropdown = dcc.Dropdown(id="my-dynamic-dropdown", placeholder="Search...", className='Dropdown-2', optionHeight=50)
 
 menu = dmc.Menu(
             children=[
@@ -28,7 +28,7 @@ menu = dmc.Menu(
             ]
         )
 
-title = dmc.Title("ASX Dashboard", c="blue", visibleFrom='md')
+title = dmc.Title("Tickersight", c="blue", visibleFrom='md')
 
 header = dmc.Grid(
     children=[

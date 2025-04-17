@@ -1,5 +1,5 @@
 import dash
-from dash import dcc, html, callback, Output, Input
+from dash import dcc, html, callback, Output, Input, dash_table
 import pandas as pd
 import plotly.express as px
 import dash_mantine_components as dmc
@@ -85,7 +85,7 @@ layout = dmc.Box([
                      ], span={"base": 8, "md": 10}),
         dmc.GridCol([dmc.Grid(dmc.Title(id='stock_price', order=2), style={'margin-bottom': '10px'}),
                      dmc.Grid(dmc.Text(id="price_change", size='md'), id='price_change_row', style={'margin-bottom': '10px'}),
-                     dmc.Grid(dmc.Text("Delayed price data ", style={"fontSize": 11}, c="gray"))],
+                     dmc.Grid(dmc.Text("Delayed price data ", style={"fontSize": 11,'margin-top': '10px'}, c="gray"))],
                     span='content', offset='auto'),
     ], justify='space-between',
         style={'margin-bottom': '20px', 'margin-top': '20px', 'margin-left': '20px', 'margin-right': '20px'}),
@@ -117,13 +117,7 @@ layout = dmc.Box([
 
     dmc.Container(html.Hr(), fluid=True, style={'margin-top': '50px', 'margin-bottom': '20px'}),
 
-    dmc.Container(dmc.Text("""All information and data presented on this website are for informational purposes only. 
-                                    We are not financial advisers and none of the content on our website should be interpreted as financial advice. 
-                                    Nothing on our website is intended to imply a recommendation or opinion about a financial product. 
-                                    Before you make an investment decision based on any of the information contained on our website, 
-                                    please consult a qualified financial adviser or stockbroker. 
-                                    We do not guarentee the accuracy or completeness of any of the information provided.""",
-                           size='xs', c='gray'), fluid=True),
+    dcc.Markdown(f'[Terms](/toc)'),
 
 ])
 
@@ -137,9 +131,10 @@ layout = dmc.Box([
       Output("peer5_dict", "data"),
       Output("peers", "data"),
       Output("peers_shown", "data")],
-    Input("ticker", "data"),
+    [Input("ticker", "data"),
+     Input("mantine-provider", "forceColorScheme")],
 )
-def get_peer_tbl(ticker):
+def get_peer_tbl(ticker, theme):
     if ticker is None:
         ticker = "TPG_AU"
     symbol = ticker[0:-3]
@@ -149,31 +144,30 @@ def get_peer_tbl(ticker):
         params = {"ticker": symbol}
         row = get_cursor(query,params)
 
-        if row:
-            dfs = []
-            dfs_graph_df = []
-            company_list = list(row)
-            for i in range(len(company_list)):
-                try:
-                    name = company_list[i] + '_AU_annual_summary'
-                    company_df = get_df_tblName(name)
-                    company_df.columns = ['Item',company_list[i]]
-                    dfs.append(company_df)
-                except:
-                    pass
-                try:
-                    name = company_list[i] + '_AU_peers'
-                    peer_df = get_df_tblName(name)
-                    if peer_df.shape[1] > 6:
-                        peer_df = pd.concat([peer_df.iloc[:, 0], peer_df.iloc[:, -5:]], axis=1)
-                    dfs_graph_df.append(peer_df.to_dict())
-                except:
-                    dfs_graph_df.append({})
-            left = dfs[0]
-            for i in range(1,len(dfs)):
-                left = pd.merge(left, dfs[i], on='Item', how='outer')
-        else:
-            print("No row found with 'AAPL' in the first column.")
+
+        dfs = []
+        dfs_graph_df = []
+        company_list = list(row)
+        for i in range(len(company_list)):
+            try:
+                name = company_list[i] + '_AU_annual_summary'
+                company_df = get_df_tblName(name)
+                company_df.columns = ['Item',company_list[i]]
+                dfs.append(company_df)
+            except:
+                pass
+            try:
+                name = company_list[i] + '_AU_peers'
+                peer_df = get_df_tblName(name)
+                if peer_df.shape[1] > 6:
+                    peer_df = pd.concat([peer_df.iloc[:, 0], peer_df.iloc[:, -5:]], axis=1)
+                dfs_graph_df.append(peer_df.to_dict())
+            except:
+                dfs_graph_df.append({})
+        left = dfs[0]
+        for i in range(1,len(dfs)):
+            left = pd.merge(left, dfs[i], on='Item', how='outer')
+
 
         sorted_columns = [left.columns[0], left.columns[1]] + sorted(left.columns[2:])
         left = left[sorted_columns]
@@ -207,7 +201,36 @@ def get_peer_tbl(ticker):
                 if col != 'Item':
                     left.loc[mask, col] = left.loc[mask, col].map(convert_to_percentage)
 
-        table = dmc.Table(data=genTBLContent(left), striped=True, withTableBorder=True, highlightOnHover=True, withColumnBorders=True,)
+        #table = dmc.Table(data=genTBLContent(left), striped=True, withTableBorder=True, highlightOnHover=True, withColumnBorders=True,)
+
+        if theme == 'light':
+            theme_style = {
+                'backgroundColor': 'rgb(255, 255, 255)',
+                'color': 'black'
+            }
+        else:
+            theme_style = {
+                'backgroundColor': 'rgb(50, 50, 50)',
+                'color': 'white'
+            }
+
+        table = dash_table.DataTable(
+            columns=[{'id': x, 'name': x, 'type': 'text', 'presentation': 'markdown'} for x in left.columns],
+            data=left.to_dict('records'),
+            style_header={'backgroundColor': 'rgb(30, 30, 30)',
+                          'color': 'white',
+                          'fontWeight': 'bold',
+                          'textAlign': 'center'},
+            style_cell={'height': 'auto',
+                        'whiteSpace': 'normal'},
+            style_table={'overflowX': 'auto'},
+            style_data=theme_style,
+            sort_action='native',
+            markdown_options={"link_target": "_self"},
+            css=[{'selector': 'p', 'rule': 'margin: 0; text-align: center; padding-left: 5px; padding-right: 5px;'},
+                 {'selector': 'td[data-dash-column="Item"] p', 'rule': 'text-align: left;'},
+                 ],
+        )
 
         companies = left.columns.to_list()
         companies_shown = companies[1:]

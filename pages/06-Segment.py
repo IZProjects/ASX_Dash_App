@@ -1,5 +1,5 @@
 import dash
-from dash import html, callback, Output, Input, dash_table
+from dash import html, callback, Output, Input, dash_table, dcc
 import dash_mantine_components as dmc
 from mysql_connect_funcs import get_cursor, get_df_query
 
@@ -19,7 +19,7 @@ layout = dmc.Box([
                      ], span={"base": 8, "md": 10}),
         dmc.GridCol([dmc.Grid(dmc.Title(id='stock_price', order=2), style={'margin-bottom': '10px'}),
                      dmc.Grid(dmc.Text(id="price_change", size='md'), id='price_change_row', style={'margin-bottom': '10px'}),
-                     dmc.Grid(dmc.Text("Delayed price data ", style={"fontSize": 11}, c="gray"))],
+                     dmc.Grid(dmc.Text("Delayed price data ", style={"fontSize": 11,'margin-top': '10px'}, c="gray"))],
                     span='content', offset='auto'),
     ], justify='space-between',
         style={'margin-bottom': '20px', 'margin-top': '20px', 'margin-left': '20px', 'margin-right': '20px'}),
@@ -32,13 +32,7 @@ layout = dmc.Box([
 
     dmc.Container(html.Hr(), fluid=True, style={'margin-top': '50px', 'margin-bottom': '20px'}),
 
-    dmc.Container(dmc.Text("""All information and data presented on this website are for informational purposes only. 
-                                    We are not financial advisers and none of the content on our website should be interpreted as financial advice. 
-                                    Nothing on our website is intended to imply a recommendation or opinion about a financial product. 
-                                    Before you make an investment decision based on any of the information contained on our website, 
-                                    please consult a qualified financial adviser or stockbroker. 
-                                    We do not guarentee the accuracy or completeness of any of the information provided.""",
-                           size='xs', c='gray'), fluid=True),
+    dcc.Markdown(f'[Terms](/toc)'),
 
 ])
 
