@@ -178,7 +178,8 @@ layout = dmc.Box([
                gap='md', justify='space-between',className="justify-content-between"),
     dmc.Container(id='output-container', fluid=True, style={'margin-top': '20px'}),
     dmc.Container(html.Hr(), fluid=True, style={'margin-top': '50px', 'margin-bottom': '20px'}),
-    dcc.Markdown(f'[Terms](/toc)'),
+    dmc.Group([dcc.Markdown(f'[Terms and Conditions](/toc)'),dcc.Markdown(f'[Privacy Policy](/privacy-policy)')], gap='md', justify='flex-end'),
+
 ])
 
 

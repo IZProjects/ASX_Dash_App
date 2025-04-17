@@ -137,7 +137,7 @@ layout = dmc.Box([
 
     dmc.Container(html.Hr(), fluid=True, style={'margin-top': '50px', 'margin-bottom': '20px'}),
 
-    dcc.Markdown(f'[Terms](/toc)'),
+    dmc.Group([dcc.Markdown(f'[Terms and Conditions](/toc)'),dcc.Markdown(f'[Privacy Policy](/privacy-policy)')], gap='md', justify='flex-end'),
 
 ])
 
