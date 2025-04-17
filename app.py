@@ -6,7 +6,7 @@ from flask import Flask
 import dash_mantine_components as dmc
 from components.header import header
 from components.sidebar import sidebar
-
+from flask import send_from_directory
 
 df = get_df_tblName("metadataTBL")
 df = df.drop_duplicates()
@@ -19,6 +19,15 @@ options = [{"label": lbl, "value": val} for lbl, val in zip(label, value)]
 
 
 server = Flask(__name__)
+
+@server.route("/robots.txt")
+def send_robots():
+    return send_from_directory("assets", "robots.txt")
+
+@server.route("/sitemap.xml")
+def send_sitemap():
+    return send_from_directory("assets", "sitemap.xml")
+
 dash._dash_renderer._set_react_version("18.2.0")
 app = dash.Dash(__name__, server=server, use_pages=True, external_stylesheets=dmc.styles.ALL)
 #app = dash.Dash(__name__, use_pages=True, external_stylesheets=dmc.styles.ALL])
