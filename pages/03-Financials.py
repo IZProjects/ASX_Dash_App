@@ -46,7 +46,7 @@ button_group1 = dmc.SegmentedControl(
     id="radios_statement",
     value='income_statement',
     color='indigo',
-    size='md',
+    size='sm',
     data=[
         {"label": "Income Statement", "value": 'income_statement'},
         {"label": "Balance Sheet", "value": 'balance_sheet'},
@@ -59,7 +59,7 @@ button_group1 = dmc.SegmentedControl(
 button_group2 = dmc.SegmentedControl(
     id="radios_period",
     color='indigo',
-    size='md',
+    size='sm',
     data=[
         {"label": "Annual", "value": "annual"},
         {"label": "Quarterly", "value": "quarterly"},
@@ -71,6 +71,7 @@ button_group2 = dmc.SegmentedControl(
 button_group3 = dmc.SegmentedControl(
     id="radios_units",
     color='indigo',
+    size='sm',
     data=[
         {"label": "K", "value": "K"},
         {"label": "M", "value": "M"},
@@ -83,6 +84,7 @@ button_group3 = dmc.SegmentedControl(
 button_group4 = dmc.SegmentedControl(
     id="radios_direction",
     color='indigo',
+    size='sm',
     data=[
         {"label": "Descending", "value": "Descending"},
         {"label": "Ascending", "value": "Ascending"},
@@ -90,9 +92,9 @@ button_group4 = dmc.SegmentedControl(
     value="Descending",
 )
 
-export_btn = dmc.Button("Export", id='exportBtn', color="gray")
+export_btn = dmc.Button("Export", id='exportBtn', color="gray", size='sm')
 
-export_btn2 = dmc.Button("Export", id='exportBtn2', color="gray")
+export_btn2 = dmc.Button("Export", id='exportBtn2', color="gray", size='sm')
 
 
 

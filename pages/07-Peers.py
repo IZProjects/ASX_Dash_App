@@ -1,5 +1,5 @@
 import dash
-from dash import dcc, html, callback, Output, Input, dash_table
+from dash import dcc, html, callback, Output, Input, dash_table, clientside_callback
 import pandas as pd
 import plotly.express as px
 import dash_mantine_components as dmc
@@ -100,19 +100,19 @@ layout = dmc.Box([
     dmc.Container(html.Hr(), fluid=True, style={'margin-bottom': '10px', 'margin-top': '10px'}),
 
     dmc.Container(dmc.Title("Valuation", order=4), fluid=True, style={'margin-bottom': '10px', 'margin-top': '20px'}),
-    dmc.Container(dcc.Dropdown(valuation_items, 'Price to Earnings', style={'color':'black'}, id='dropdown1'), fluid=True),
+    dmc.Container(dcc.Dropdown(valuation_items, 'Price to Earnings', style={'color':'black'}, id='dropdown1'), fluid=True, id='dropdownContainer1'),
     dmc.Container(dcc.Graph(id="Graph1"), fluid=True),
 
     dmc.Container(dmc.Title("Efficiency / Margins", order=4), fluid=True, style={'margin-bottom': '10px', 'margin-top': '20px'}),
-    dmc.Container(dcc.Dropdown(efficiency_items, 'Return on Equity', style={'color':'black'}, id='dropdown2'), fluid=True),
+    dmc.Container(dcc.Dropdown(efficiency_items, 'Return on Equity', style={'color':'black'}, id='dropdown2'), fluid=True, id='dropdownContainer2'),
     dmc.Container(dcc.Graph(id="Graph2"), fluid=True),
 
     dmc.Container(dmc.Title("Growth", order=4), fluid=True, style={'margin-bottom': '10px', 'margin-top': '20px'}),
-    dmc.Container(dcc.Dropdown(growth_items, 'Revenue Growth', style={'color':'black'}, id='dropdown3'), fluid=True),
+    dmc.Container(dcc.Dropdown(growth_items, 'Revenue Growth', style={'color':'black'}, id='dropdown3'), fluid=True, id='dropdownContainer3'),
     dmc.Container(dcc.Graph(id="Graph3"), fluid=True),
 
     dmc.Container(dmc.Title("Other Useful Metrics", order=4), fluid=True, style={'margin-bottom': '10px', 'margin-top': '20px'}),
-    dmc.Container(dcc.Dropdown(other_items, 'Debt to Equity', style={'color':'black'}, id='dropdown4'), fluid=True),
+    dmc.Container(dcc.Dropdown(other_items, 'Debt to Equity', style={'color':'black'}, id='dropdown4'), fluid=True, id='dropdownContainer4'),
     dmc.Container(dcc.Graph(id="Graph4"), fluid=True),
 
     dmc.Container(html.Hr(), fluid=True, style={'margin-top': '50px', 'margin-bottom': '20px'}),
@@ -121,6 +121,26 @@ layout = dmc.Box([
 
 
 ])
+
+clientside_callback(
+    """
+    function(theme) {
+        if (theme === 'dark') {
+            return ['darkDropdown', 'darkDropdown', 'darkDropdown', 'darkDropdown'];
+        } else {
+            return ['lightDropdown', 'lightDropdown', 'lightDropdown', 'lightDropdown'];
+        }
+    }
+    """,
+    [
+        Output("dropdownContainer1", "className"),
+        Output("dropdownContainer2", "className"),
+        Output("dropdownContainer3", "className"),
+        Output("dropdownContainer4", "className")
+    ],
+    Input("mantine-provider", "forceColorScheme")
+)
+
 
 @callback(
      [Output("peerTBLRow", "children"),

@@ -81,13 +81,11 @@ clientside_callback(
 clientside_callback(
     ClientsideFunction(
         namespace='clientside',
-        function_name='theme_switcher_callback'
+        function_name='update_theme'
     ),
-    Output("mantine-provider", "theme"),
     Output("mantine-provider", "forceColorScheme"),
-    Output("color-scheme-toggle", "rightSection"),
-    Output("color-scheme-toggle", "label"),
-    Input("color-scheme-toggle", "n_clicks")
+    Output("mantine-provider", "theme"),
+    Input("color-scheme-switch", "checked"),
 )
 
 @callback(

@@ -1,5 +1,5 @@
 import dash
-from dash import dcc, html, Input, Output, State, callback, ALL, dash_table, clientside_callback, ClientsideFunction
+from dash import dcc, html, Input, Output, State, callback, ALL, dash_table, clientside_callback
 import dash_mantine_components as dmc
 import re
 from mysql_connect_funcs import get_df_query
@@ -182,6 +182,19 @@ layout = dmc.Box([
 
 ])
 
+clientside_callback(
+    """
+    function(theme) {
+        if (theme === 'dark') {
+            return 'darkDropdown';
+        } else {
+            return 'lightDropdown';
+        }
+    }
+    """,
+    Output("cards_section", "className"),
+    Input("mantine-provider", "forceColorScheme")
+)
 
 @callback(
     [Output('cards_section', 'children'),
@@ -227,57 +240,57 @@ def generate_cards(*selected_values):
         cardNumeric = dmc.Paper(
             dmc.Grid([
                 dmc.GridCol(dmc.Title(item, order=5), span=3),
-                dmc.GridCol(dcc.Dropdown(['Greater than', 'Less Than', 'Equal to'], 'Greater than',id={'type': 'numeric_compare', 'index': item}, style={'color':'black'}, searchable=False, persistence=True, persistence_type ='memory'), span=2),
+                dmc.GridCol(dcc.Dropdown(['Greater than', 'Less Than', 'Equal to'], 'Greater than',id={'type': 'numeric_compare', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), span=2,),
                 dmc.GridCol(dmc.NumberInput(placeholder="Input goes here...", id={'type': 'numeric_input', 'index': item}, persistence=True, persistence_type ='memory'), span=3),
-                dmc.GridCol(dcc.Dropdown(['Thousands', 'Millions', 'Billions'], 'Millions', id={'type': 'numeric_unit', 'index': item}, style={'color':'black'}, searchable=False, persistence=True, persistence_type ='memory'), span=2),
-                dmc.GridCol(dcc.Dropdown(['Filter', 'Display'], 'Filter', id={'type': 'numeric_type', 'index': item}, style={'color':'black'}, searchable=False, persistence=True, persistence_type ='memory'), span=2)
+                dmc.GridCol(dcc.Dropdown(['Thousand', 'Million', 'Billion'], 'Million', id={'type': 'numeric_unit', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), span=2,),
+                dmc.GridCol(dcc.Dropdown(['Filter', 'Display'], 'Filter', id={'type': 'numeric_type', 'index': item},  searchable=False, persistence=True, persistence_type ='memory'), span=2,)
             ]), p='md', withBorder=True, shadow='sm'
         )
 
         cardSingularNumeric = dmc.Paper(
             dmc.Grid([
                 dmc.GridCol(dmc.Title(item, order=5), span=3),
-                dmc.GridCol(dcc.Dropdown(['Greater than', 'Less Than', 'Equal to'], 'Greater than', style={'color':'black'}, id={'type': 'singular_compare', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), span=2),
+                dmc.GridCol(dcc.Dropdown(['Greater than', 'Less Than', 'Equal to'], 'Greater than', id={'type': 'singular_compare', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), span=2,),
                 dmc.GridCol(dmc.NumberInput(placeholder="Input goes here...", id={'type': 'singular_input', 'index': item}, persistence=True, persistence_type ='memory'), span=5),
-                dmc.GridCol(dcc.Dropdown(['Filter', 'Display'], 'Filter', style={'color':'black'}, id={'type': 'singular_type', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), span=2)
+                dmc.GridCol(dcc.Dropdown(['Filter', 'Display'], 'Filter', id={'type': 'singular_type', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), span=2,)
             ]), p='md', withBorder=True, shadow='sm'
         )
         cardSector = dmc.Paper(
             dmc.Grid([
                 dmc.GridCol(dmc.Title(item, order=5), span=3),
-                dmc.GridCol(dcc.Dropdown(morningstar_sectors, id={'type': 'sector_select', 'index': item}, style={'color':'black'}, multi=True, persistence=True, persistence_type ='memory'), span=7),
-                dmc.GridCol(dcc.Dropdown(['Filter', 'Display'], 'Filter', style={'color':'black'}, id={'type': 'sector_type', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), span=2)
+                dmc.GridCol(dcc.Dropdown(morningstar_sectors, id={'type': 'sector_select', 'index': item}, multi=True, persistence=True, persistence_type ='memory'), span=7,),
+                dmc.GridCol(dcc.Dropdown(['Filter', 'Display'], 'Filter', id={'type': 'sector_type', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), span=2,)
             ]), p='md', withBorder=True, shadow='sm'
         )
         cardIndustry = dmc.Paper(
             dmc.Grid([
                 dmc.GridCol(dmc.Title(item, order=5), span=3),
-                dmc.GridCol(dcc.Dropdown(morningstar_industry, id={'type': 'industry_select', 'index': item}, style={'color':'black'}, multi=True, persistence=True, persistence_type ='memory'), span=7),
-                dmc.GridCol(dcc.Dropdown(['Filter', 'Display'], 'Filter', id={'type': 'industry_type', 'index': item}, style={'color':'black'}, searchable=False, persistence=True, persistence_type ='memory'), span=2)
+                dmc.GridCol(dcc.Dropdown(morningstar_industry, id={'type': 'industry_select', 'index': item}, multi=True, persistence=True, persistence_type ='memory'), span=7),
+                dmc.GridCol(dcc.Dropdown(['Filter', 'Display'], 'Filter', id={'type': 'industry_type', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), span=2,)
             ]), p='md', withBorder=True, shadow='sm'
         )
         cardExchange = dmc.Paper(
             dmc.Grid([
                 dmc.GridCol(dmc.Title(item, order=5), span=3),
-                dmc.GridCol(dcc.Dropdown(['ASX'], id={'type': 'exchange_select', 'index': item}, style={'color':'black'}, multi=True, persistence=True, persistence_type ='memory'), span=7),
-                dmc.GridCol(dcc.Dropdown(['Filter', 'Display'], 'Filter', id={'type': 'exchange_type', 'index': item}, style={'color':'black'}, searchable=False, persistence=True, persistence_type ='memory'), span=2)
+                dmc.GridCol(dcc.Dropdown(['ASX'], id={'type': 'exchange_select', 'index': item}, multi=True, persistence=True, persistence_type ='memory'), span=7),
+                dmc.GridCol(dcc.Dropdown(['Filter', 'Display'], 'Filter', id={'type': 'exchange_type', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), span=2)
             ]), p='md', withBorder=True, shadow='sm'
         )
         cardRatio = dmc.Paper(
             dmc.Grid([
                 dmc.GridCol(dmc.Title(item, order=5), span=3),
-                dmc.GridCol(dcc.Dropdown(['Greater than', 'Less Than', 'Equal to'], 'Greater than', style={'color':'black'}, id={'type': 'ratio_compare', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), span=2),
+                dmc.GridCol(dcc.Dropdown(['Greater than', 'Less Than', 'Equal to'], 'Greater than', id={'type': 'ratio_compare', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), span=2),
                 dmc.GridCol(dmc.NumberInput(placeholder="Input goes here...", id={'type': 'ratio_input', 'index': item}, persistence=True, persistence_type ='memory'), span=3),
-                dmc.GridCol(dcc.Dropdown(['Ratio'], 'Ratio', id={'type': 'ratio_unit', 'index': item}, style={'color':'black'}, searchable=False), span=2),
-                dmc.GridCol(dcc.Dropdown(['Filter', 'Display'], 'Filter', id={'type': 'ratio_type', 'index': item}, style={'color':'black'}, searchable=False, persistence=True, persistence_type ='memory'), span=2)
+                dmc.GridCol(dcc.Dropdown(['Ratio'], 'Ratio', id={'type': 'ratio_unit', 'index': item}, searchable=False), span=2,),
+                dmc.GridCol(dcc.Dropdown(['Filter', 'Display'], 'Filter', id={'type': 'ratio_type', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), span=2)
             ]), p='md', withBorder=True, shadow='sm'
         )
         cardPercentage = dmc.Paper(
             dmc.Grid([
                 dmc.GridCol(dmc.Title(item, order=5), span=3),
-                dmc.GridCol(dcc.Dropdown(['Greater than', 'Less Than', 'Equal to'], 'Greater than', style={'color':'black'}, id={'type': 'pct_compare', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), span=2),
+                dmc.GridCol(dcc.Dropdown(['Greater than', 'Less Than', 'Equal to'], 'Greater than', id={'type': 'pct_compare', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), span=2,),
                 dmc.GridCol(dmc.NumberInput(placeholder="Input goes here...", suffix="%", id={'type': 'pct_input', 'index': item}, min=-100, max=100, persistence=True, persistence_type ='memory'), span=5),
-                dmc.GridCol(dcc.Dropdown(['Filter', 'Display'], 'Filter', id={'type': 'pct_type', 'index': item}, style={'color':'black'}, searchable=False, persistence=True, persistence_type ='memory'), span=2)
+                dmc.GridCol(dcc.Dropdown(['Filter', 'Display'], 'Filter', id={'type': 'pct_type', 'index': item}, searchable=False, persistence=True, persistence_type ='memory'), span=2,)
             ]), p='md', withBorder=True, shadow='sm'
         )
 
