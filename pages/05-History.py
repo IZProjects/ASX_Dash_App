@@ -4,7 +4,7 @@ import pandas as pd
 import dash_mantine_components as dmc
 from mysql_connect_funcs import get_df_query
 
-dash.register_page(__name__, name='History')
+dash.register_page(__name__, name='History', title='Company History', description='Get a comprehensive summary of all the key events that have happened to any ASX company up tothis point.')
 
 button = dmc.SegmentedControl(
     id='controls',

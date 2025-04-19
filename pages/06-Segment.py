@@ -3,7 +3,7 @@ from dash import html, callback, Output, Input, dash_table, dcc
 import dash_mantine_components as dmc
 from mysql_connect_funcs import get_cursor, get_df_query
 
-dash.register_page(__name__, name='Segment')
+dash.register_page(__name__, name='Segment', title='Segment Information', description='Get a summary of segment information and results for all ASX stocks')
 
 layout = dmc.Box([
     dmc.Grid([

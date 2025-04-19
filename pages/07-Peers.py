@@ -7,7 +7,7 @@ from mysql_connect_funcs import get_df_tblName, get_df_query, get_cursor
 import plotly.graph_objects as go
 from utils.df_to_mantineTBL import genTBLContent
 
-dash.register_page(__name__, name='Peer Comparison') # '/' is home page
+dash.register_page(__name__, name='Peer Comparison', title='Peer Comparison', description='Research your stocks by comparing them to their key competitors and peers') # '/' is home page
 
 valuation_items = ['Price to Earnings', 'Price to Book Value', 'Price to Tangible Book Value', 'Price to Sales','Price to Free Cash Flow', 'Price to Pretax Income',
                    'Enterprise Value to Earnings', 'Enterprise Value to Book Value','Enterprise Value to Tangible Book Value','Enterprise Value to Sales',

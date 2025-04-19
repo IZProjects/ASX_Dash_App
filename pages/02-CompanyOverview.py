@@ -12,7 +12,7 @@ import numpy as np
 pd.options.mode.chained_assignment = None  # default='warn'
 
 
-dash.register_page(__name__, name='Company Overview')
+dash.register_page(__name__, name='Company Overview', title='Company Overview', description="""Get up to date stock prices, charts, key metrics and a summary of growth drivers and risks for all ASX stocks.""")
 
 
 TABLE_SIZE = 16

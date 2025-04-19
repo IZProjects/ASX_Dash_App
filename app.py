@@ -2,11 +2,12 @@ import dash
 from dash import dcc, Input, Output, callback, State, page_container, clientside_callback, ClientsideFunction
 from dash.exceptions import PreventUpdate
 from mysql_connect_funcs import get_df_tblName, get_df_query
-from flask import Flask
+from flask import Flask, Response
 import dash_mantine_components as dmc
 from components.header import header
 from components.sidebar import sidebar
 from flask import send_from_directory
+import datetime
 
 df = get_df_tblName("metadataTBL")
 df = df.drop_duplicates()
@@ -24,9 +25,27 @@ server = Flask(__name__)
 def send_robots():
     return send_from_directory("assets", "robots.txt")
 
+
 @server.route("/sitemap.xml")
-def send_sitemap():
-    return send_from_directory("assets", "sitemap.xml")
+def sitemap():
+    # Optional: pull from dash.page_registry
+    pages = [page["path"] for page in dash.page_registry.values()]
+
+    sitemap_xml = ['<?xml version="1.0" encoding="UTF-8"?>']
+    sitemap_xml.append('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')
+
+    for path in pages:
+        sitemap_xml.append(f"""
+            <url>
+                <loc>https://yourdomain.com{path}</loc>
+                <lastmod>{datetime.date.today().isoformat()}</lastmod>
+                <changefreq>weekly</changefreq>
+                <priority>0.8</priority>
+            </url>
+        """)
+
+    sitemap_xml.append('</urlset>')
+    return Response("\n".join(sitemap_xml), mimetype='application/xml')
 
 dash._dash_renderer._set_react_version("18.2.0")
 app = dash.Dash(__name__, server=server, use_pages=True, external_stylesheets=dmc.styles.ALL)

@@ -6,7 +6,10 @@ import dash_mantine_components as dmc
 from mysql_connect_funcs import get_df_tblName
 
 
-dash.register_page(__name__, path='/', name='Discover') # '/' is home page
+dash.register_page(__name__, path='/', name='Discover', title='ASX Stock Market Research & Analysis Platform',
+                   description="""Tickersight allows individual investors to access institutional-grade stock market data and analysis. 
+                   Find hidden gems using the most powerful stock screener on the ASX and get 20 year financials, company segment data, 
+                   peer comparisons and a history of all major changes in the company. Beat the market with Tickersight!""") # '/' is home page
 
 def gen_chart(df, colour):
     fig = go.Figure()

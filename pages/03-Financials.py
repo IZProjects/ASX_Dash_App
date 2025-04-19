@@ -4,7 +4,7 @@ import pandas as pd
 import dash_mantine_components as dmc
 from mysql_connect_funcs import get_df_tblName
 
-dash.register_page(__name__, name='Financials')
+dash.register_page(__name__, name='Financials', title='Comprehensive financial statements for all ASX stocks', description='Get 20+ years of income statements, balance sheets, cashflow statements as well as other key metrics and financial data for all ASX stocks. ')
 def convert_to_percentage(value):
     return f"{float(value) * 100:.2f}%"
 def format_number(x):
