@@ -86,6 +86,7 @@ button_group2 = dmc.SegmentedControl(
 
 
 layout = dmc.Box([
+    html.H1(children="Company Overview | Tickersight", hidden=True),
     dcc.Store(id="dict_daily", storage_type='session', data={}),
     dcc.Store(id="dict_weekly", storage_type='session', data={}),
     dcc.Store(id="dict_monthly", storage_type='session', data={}),

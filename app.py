@@ -37,7 +37,7 @@ def sitemap():
     for path in pages:
         sitemap_xml.append(f"""
             <url>
-                <loc>https://yourdomain.com{path}</loc>
+                <loc>https://tickersight.com{path}</loc>
                 <lastmod>{datetime.date.today().isoformat()}</lastmod>
                 <changefreq>weekly</changefreq>
                 <priority>0.8</priority>
