@@ -6,7 +6,7 @@ import dash_mantine_components as dmc
 from mysql_connect_funcs import get_df_tblName
 
 
-dash.register_page(__name__, path='/', name='Discover', title='ASX Stock Market Research & Analysis Platform',
+dash.register_page(__name__, path='/', name='Discover', title='Discover ASX Stocks',
                    description="""Tickersight allows individual investors to access institutional-grade stock market data and analysis. 
                    Find hidden gems using the most powerful stock screener on the ASX and get 20 year financials, company segment data, 
                    peer comparisons and a history of all major changes in the company. Beat the market with Tickersight!""") # '/' is home page
@@ -199,6 +199,7 @@ table_growthStory = dash_table.DataTable(
 )
 
 layout = dmc.Box([
+    html.H1(children="ASX Stock Market Research & Analysis Tools", hidden=True),
     dcc.Store(id="gain_store", storage_type='session', data=get_df_tblName("winners").to_dict()),
     dcc.Store(id="loss_store", storage_type='session', data=get_df_tblName("losers").to_dict()),
     dcc.Store(id="active_store", storage_type='session', data=get_df_tblName("active").to_dict()),

@@ -4,7 +4,7 @@ import dash_mantine_components as dmc
 import re
 from mysql_connect_funcs import get_df_query
 
-dash.register_page(__name__, name='Screener', title='ASX Stock Screener', description='Tickersight offers an institutional-grade stock screener for the ASX')
+dash.register_page(__name__, name='Screener', title='Stock Screener | Tickersight', description='Tickersight offers an institutional-grade stock screener for the ASX')
 
 
 general = ['Sector', 'Industry', 'Number of Basic Shares', 'Number of Shares Diluted', 'Exchange', 'Market Cap', 'Enterprise Value']
@@ -167,6 +167,7 @@ modal = html.Div(
 
 
 layout = dmc.Box([
+    html.H1(children="ASX Stock Screener | Tickersight", hidden=True),
     dcc.Store(id='store-selected-values', storage_type='session', data={}),
     dcc.Store(id='store-selected-values', storage_type='session', data={}),
     dcc.Store(id='store_numeric', storage_type='session', data={}),

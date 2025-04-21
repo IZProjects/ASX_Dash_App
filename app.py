@@ -1,8 +1,8 @@
 import dash
-from dash import dcc, Input, Output, callback, State, page_container, clientside_callback, ClientsideFunction
+from dash import dcc, Input, Output, callback, State, page_container, clientside_callback, ClientsideFunction, html
 from dash.exceptions import PreventUpdate
 from mysql_connect_funcs import get_df_tblName, get_df_query
-from flask import Flask, Response
+from flask import Flask, Response, render_template_string
 import dash_mantine_components as dmc
 from components.header import header
 from components.sidebar import sidebar
@@ -19,12 +19,12 @@ value = df['value'].to_list()
 options = [{"label": lbl, "value": val} for lbl, val in zip(label, value)]
 
 
+
 server = Flask(__name__)
 
 @server.route("/robots.txt")
 def send_robots():
     return send_from_directory("assets", "robots.txt")
-
 
 @server.route("/sitemap.xml")
 def sitemap():
@@ -47,9 +47,11 @@ def sitemap():
     sitemap_xml.append('</urlset>')
     return Response("\n".join(sitemap_xml), mimetype='application/xml')
 
+
+
 dash._dash_renderer._set_react_version("18.2.0")
-app = dash.Dash(__name__, server=server, use_pages=True, external_stylesheets=dmc.styles.ALL)
-#app = dash.Dash(__name__, use_pages=True, external_stylesheets=dmc.styles.ALL])
+app = dash.Dash(__name__, server=server, use_pages=True, external_stylesheets=dmc.styles.ALL, title='ASX Stock Market Research & Analysis Tools')
+
 
 
 layout = dmc.AppShell(
@@ -70,7 +72,6 @@ layout = dmc.AppShell(
 )
 
 app.layout = dmc.MantineProvider(id="mantine-provider",children=[layout])
-
 
 clientside_callback(
     ClientsideFunction(
@@ -106,6 +107,7 @@ clientside_callback(
     Output("mantine-provider", "theme"),
     Input("color-scheme-switch", "checked"),
 )
+
 
 @callback(
     Output("my-dynamic-dropdown", "options"),
