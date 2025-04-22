@@ -17,6 +17,7 @@ button = dmc.SegmentedControl(
 
 
 layout = dmc.Box([
+    html.H1(children="ASX Company History | Tickersight", hidden=True),
     dcc.Store(id="long_history", storage_type='session', data={}),
     dcc.Store(id="short_history", storage_type='session', data={}),
 

@@ -63,6 +63,7 @@ def format_number(num_str):
 
 
 layout = dmc.Box([
+    html.H1(children="Peer Comparison | Tickersight", hidden=True),
     dcc.Store(id="target_dict", storage_type='session', data={}),
     dcc.Store(id="peer1_dict", storage_type='session', data={}),
     dcc.Store(id="peer2_dict", storage_type='session', data={}),

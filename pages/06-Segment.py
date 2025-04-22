@@ -6,6 +6,7 @@ from mysql_connect_funcs import get_cursor, get_df_query
 dash.register_page(__name__, name='Segment', title='Segment Information', description='Get a summary of segment information and results for all ASX stocks')
 
 layout = dmc.Box([
+    html.H1(children="Segment Information | Tickersight", hidden=True),
     dmc.Grid([
         dmc.GridCol([dmc.Grid(dmc.Title(id='stock_name', order=2), style={'margin-bottom': '10px'}),
                      dmc.Grid(
