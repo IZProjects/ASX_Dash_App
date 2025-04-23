@@ -238,6 +238,7 @@ def load_data(pathname):
     df_ann['Date'] = pd.to_datetime(df_ann['Date'], format='%d %b %Y %I:%M%p')
     df_ann = df_ann.sort_values('Date', ascending=False).reset_index(drop=True)
     df_ann['Date'] = df_ann['Date'].dt.strftime('%d/%m/%Y')
+    df_ann.drop(columns=['Document Number'], inplace=True)
 
     table_ann = dash_table.DataTable(
         id='table_ann',
@@ -249,8 +250,9 @@ def load_data(pathname):
                       'textAlign': 'center'},
         style_cell={'height': 'auto',
                     'whiteSpace': 'normal'},
+        style_table={'overflowX': 'auto'},
         sort_action='native',
-        page_size=10,
+        page_size=20,
         markdown_options={"link_target": "_self"},
         css=[{'selector': 'p', 'rule': 'margin: 0; text-align: center; padding-left: 5px; padding-right: 5px;'},
              {'selector': 'td[data-dash-column="Document Name"] p', 'rule': 'text-align: left;'},
