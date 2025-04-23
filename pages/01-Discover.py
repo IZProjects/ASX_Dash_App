@@ -3,7 +3,7 @@ from dash import dcc, callback, Output, Input, dash_table, html
 import pandas as pd
 import plotly.graph_objects as go
 import dash_mantine_components as dmc
-from mysql_connect_funcs import get_df_tblName
+from mysql_connect_funcs import get_df_tblName, get_df_query
 
 
 dash.register_page(__name__, path='/', name='Discover', title='Discover ASX Stocks',
@@ -132,7 +132,8 @@ def load_data(pathname):
     discovery_growth = get_df_tblName("discovery_growth").to_dict()
     discovery_growth_100M = get_df_tblName("discovery_growth_100M").to_dict()
 
-    df_IT = get_df_tblName("insiderTrades_today")
+    query = "SELECT * FROM insiderTrades_total ORDER BY Date DESC LIMIT 60;"
+    df_IT = get_df_query(query)
     df_IT['Date'] = pd.to_datetime(df_IT['Date'], format='%d %b %Y %I:%M%p')
     df_IT = df_IT.sort_values('Date', ascending=False).reset_index(drop=True)
     df_IT['Date'] = df_IT['Date'].dt.strftime('%d/%m/%Y')
@@ -149,7 +150,7 @@ def load_data(pathname):
                     'whiteSpace': 'normal'},
         style_table={'overflowX': 'auto'},
         sort_action='native',
-        page_size=10,
+        page_size=20,
         markdown_options={"link_target": "_self"},
         css=[{'selector': 'p', 'rule': 'margin: 0; text-align: center; padding-left: 5px; padding-right: 5px;'},
              {'selector': 'td[data-dash-column="Director"] p', 'rule': 'text-align: left;'},
