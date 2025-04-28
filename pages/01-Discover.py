@@ -75,22 +75,22 @@ layout = dmc.Box([
     dmc.Container(dmc.Text("Insider Trades", fw=700, size='xl'), style={'margin-bottom': '5px'}, fluid=True),
     dmc.Container(style={'margin-bottom': '20px'}, fluid=True, id='IT_container'),
 
-    dmc.Container(dmc.Text("Deep Value Candidates", fw=700, size='xl'), style={'margin-bottom': '5px'}, fluid=True),
+    dmc.Container(dmc.Text("Deep Value Stock Ideas", fw=700, size='xl'), style={'margin-bottom': '5px'}, fluid=True),
     dmc.Container(dmc.Checkbox(id='DV_check', label="100M+ Only", size="md"), style={'margin-bottom': '10px'}, fluid=True),
     dmc.Container(id='DV_container', style={'margin-bottom': '20px'}, fluid=True),
 
-    dmc.Container(dmc.Text("High ROE Candidates", fw=700, size='xl'), style={'margin-bottom': '5px'}, fluid=True),
+    dmc.Container(dmc.Text("High ROE Stock Ideas", fw=700, size='xl'), style={'margin-bottom': '5px'}, fluid=True),
     dmc.Container(dmc.Checkbox(id='ROE_check', label="100M+ Only", size="md"), style={'margin-bottom': '10px'}, fluid=True),
     dmc.Container(id='ROE_container', style={'margin-bottom': '20px'}, fluid=True),
 
-    dmc.Container(dmc.Text("High Growth Candidates", fw=700, size='xl'), style={'margin-bottom': '5px'}, fluid=True),
+    dmc.Container(dmc.Text("High Growth Stock Ideas", fw=700, size='xl'), style={'margin-bottom': '5px'}, fluid=True),
     dmc.Container(dmc.Checkbox(id='growth_check', label="100M+ Only", size="md"), style={'margin-bottom': '10px'}, fluid=True),
     dmc.Container(id='Growth_container', style={'margin-bottom': '20px'}, fluid=True),
 
-    dmc.Container(dmc.Text("Turnaround Stories", fw=700, size='xl'), style={'margin-bottom': '5px'}, fluid=True),
+    dmc.Container(dmc.Text("Turnaround Stock Ideas", fw=700, size='xl'), style={'margin-bottom': '5px'}, fluid=True),
     dmc.Container(style={'margin-bottom': '20px'}, fluid=True, id='turnaround_container'),
 
-    dmc.Container(dmc.Text("Growth Stories", fw=700, size='xl'), style={'margin-bottom': '5px'}, fluid=True),
+    dmc.Container(dmc.Text("Growth Stock Ideas", fw=700, size='xl'), style={'margin-bottom': '5px'}, fluid=True),
     dmc.Container(style={'margin-bottom': '20px'}, fluid=True, id='growthStory_container'),
 
     dmc.Container(html.Hr(), fluid=True, style={'margin-top': '50px', 'margin-bottom': '20px'}),
