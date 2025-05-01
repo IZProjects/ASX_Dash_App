@@ -192,6 +192,7 @@ def load_data(pathname):
                 'color': 'red',
                 'fontWeight': 'bold'
             },
+
         ]
     )
 

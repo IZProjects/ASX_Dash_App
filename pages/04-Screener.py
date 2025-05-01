@@ -118,7 +118,7 @@ def generate_checklists(main_list, label):
                             persistence=True,
                             persistence_type='session',
                         ),
-                        span=4  # Adjust column width as needed
+                        span={'base': 12, 'sm': 4,}  # Adjust column width as needed
                     )
                 )
             else:
@@ -131,7 +131,7 @@ def generate_checklists(main_list, label):
                             persistence=True,
                             persistence_type='session',
                         ),
-                        span=4  # Adjust column width as needed
+                        span={'base': 12, 'sm': 4,}  # Adjust column width as needed
                     )
                 )
         rows.append(dmc.Grid(columns, justify='space-between', style={'margin-bottom': '10px'}))
