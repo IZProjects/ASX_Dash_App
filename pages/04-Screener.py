@@ -1,8 +1,10 @@
 import dash
-from dash import dcc, html, Input, Output, State, callback, ALL, dash_table, clientside_callback
+from dash import dcc, html, Input, Output, State, callback, ALL, clientside_callback, dash_table
 import dash_mantine_components as dmc
 import re
 from mysql_connect_funcs import get_df_query
+
+
 
 dash.register_page(__name__, name='Screener', title='Stock Screener | Tickersight', description='Tickersight offers an institutional-grade stock screener for the ASX')
 
@@ -17,9 +19,9 @@ efficiency = ['Return on Assets', 'Return on Equity', 'Return on Invested Capita
 IS = ['Revenue', 'Cost of Goods Sold', 'Gross Profit', 'Selling, General and Admin Expenses', 'Research & Development', 'Total Operating Expenses','EBITDA',
      'Operating Income', 'Pre-tax Income', 'Net Income', 'EPS - Basic', 'EPS - Diluted', 'Revenue per Share', 'EBITDA per Share', 'Operating Income per Share', 'Pretax Income per Share']
 
-margins = ['Gross Margin', 'EBITDA Margin', 'Operating Margin', 'Pretax Margin', 'Net Income Margin', 'Underwriting Margin', 'Free Cash Flow Margin']
+margins = ['Gross Margin', 'EBITDA Margin', 'Operating Margin', 'Pretax Margin', 'Net Income Margin', 'Underwriting Margin', 'Free Cash Flow Margin',  'Net Interest Margin',]
 
-IS_growth = ['Revenue Growth', 'Gross Profit Growth', 'EBITDA Growth', 'Operating Income Growth', 'Pre-Tax Income Growth', 'Net Income Growth', 'Diluted EPS Growth', 'Number of Diluted Shares Growth', 'Net Interest Margin',
+IS_growth = ['Revenue Growth', 'Gross Profit Growth', 'EBITDA Growth', 'Operating Income Growth', 'Pre-Tax Income Growth', 'Net Income Growth', 'Diluted EPS Growth', 'Number of Diluted Shares Growth',
              'Net Interest Income Growth','Policy Revenue Growth']
 
 BS = ['Cash & Cash Equivalent', 'Receivables', 'Inventories', 'Total Current Assets','Plant, Property & Equipment (Net)', 'Intangible Assets', 'Total Assets', 'Accounts Payble', 'Short Term Debt',
@@ -94,6 +96,11 @@ def format_number(num_str):
 
     return formatted_number
 
+def convert_percentage_columns(df):
+    for col in df.select_dtypes(include='object').columns:
+        if df[col].str.contains(r'^\s*-?\d+(\.\d+)?\s*%$', na=False).all():
+            df[col] = df[col].str.strip().str.rstrip('%').astype(float) / 100
+    return df
 
 def create_link(item):
     return dcc.Link(item[:-3], href='/02-companyoverview?data='+item, id=f'link-{item}')
@@ -422,6 +429,7 @@ def print_values(theme, n_clicks, ratio_items, pct_items, singular_items, numeri
                 if items[3] == 'Filter':
                     sql_query_conditions.append(' '.join(map(str, items[:3])))
 
+
         if len(sector_items) > 0:
             if sector_type[0] == "Filter":
                 sector_select = str(sector_select[0]).replace('[', '(').replace(']', ')')
@@ -457,6 +465,7 @@ def print_values(theme, n_clicks, ratio_items, pct_items, singular_items, numeri
                 "ON Screener_TBL1.Item = Screener_TBL2.Item " +
                 conditions
         )
+
     except:
         alert = dmc.Alert(
             "Please check the filters and submit again!",
@@ -488,9 +497,17 @@ def print_values(theme, n_clicks, ratio_items, pct_items, singular_items, numeri
         new_df['Item'] = new_df['Item'].apply(lambda x: f'[{x[0:3]}](/02-companyoverview?data={x})')
         twoDPUpdated = [col for col in twoDP if col in new_df.columns]
         new_df[twoDPUpdated] = new_df[twoDPUpdated].map(lambda x: round(float(x), 2))
+        percentagesUpdated = [col for col in percentages if col in new_df.columns]
+        new_df[percentagesUpdated] = new_df[percentagesUpdated].map(lambda x: round(float(x)*100, 2))
+        cols_to_update = [col for col in percentagesUpdated if col in new_df.columns]
+        new_df.rename(columns={col: f"{col} (%)" for col in cols_to_update}, inplace=True)
         KMBUpdated = [col for col in KMB if col in new_df.columns]
-        KMBUpdated = list(set(KMBUpdated))
-        new_df[KMBUpdated] = new_df[KMBUpdated].map(format_number)
+        new_df[KMBUpdated] = new_df[KMBUpdated].astype(float)
+
+        #KMBUpdated = [col for col in KMB if col in new_df.columns]
+        #KMBUpdated = list(set(KMBUpdated))
+        #new_df[KMBUpdated] = new_df[KMBUpdated].map(format_number)
+
 
         if theme == 'light':
             theme_style = {
