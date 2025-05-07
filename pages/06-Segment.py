@@ -2,11 +2,12 @@ import dash
 from dash import html, callback, Output, Input, dash_table, dcc
 import dash_mantine_components as dmc
 from mysql_connect_funcs import get_cursor, get_df_query
+import re
 
-dash.register_page(__name__, name='Segment', title='Segment Information', description='Get a summary of segment information and results for all ASX stocks')
+dash.register_page(__name__, name='Business Profile', title='Business Profile', description='Get a summary of all the key information about the business')
 
 layout = dmc.Box([
-    html.H1(children="Segment Information | Tickersight", hidden=True),
+    html.H1(children="Business Profile | Tickersight", hidden=True),
     dmc.Grid([
         dmc.GridCol([dmc.Grid(dmc.Title(id='stock_name', order=2), style={'margin-bottom': '10px'}),
                      dmc.Grid(
@@ -14,7 +15,6 @@ layout = dmc.Box([
                              dmc.Badge(id='currency_badge', color="indigo", className="me-1"),
                              dmc.Badge(id='sector_badge', color="red", className="me-1"),
                              dmc.Badge(id='industry_badge', color="violet", className="me-1"),
-                             dmc.Badge(id='category_badge', color="gray", className="me-1")
                          ], gap='sm')
                      )
                      ], span={"base": 8, "md": 10}),
@@ -29,7 +29,6 @@ layout = dmc.Box([
 
     dmc.Container(id='SegmentDescriptionRow', fluid=True, style={'margin-bottom': '20px'}),
     dmc.Container(id='SegmentResultsTitle', fluid=True, style={'margin-top': '20px', 'margin-bottom': '5px'}),
-    dmc.Container(id='SegmentResultsRow', fluid=True),
 
     dmc.Container(html.Hr(), fluid=True, style={'margin-top': '50px', 'margin-bottom': '20px'}),
 
@@ -46,30 +45,16 @@ def get_segmentDescriptions(ticker):
     try:
         if ticker is None:
             ticker = "TPG_AU"
-        query = "SELECT content FROM SegmentDescription WHERE ticker = :ticker;"
+        query = "SELECT content FROM companyDetails WHERE ticker = :ticker;"
         params = {"ticker": ticker[0:-3]}
         texts = get_cursor(query,params)
         texts = texts[0]
+        texts = re.sub(r'^[\s\S]*?(?=(\*\*|##))', '', texts) if '**' in texts or '##' in texts else "No information available"
 
-
-        texts = texts.replace(':', ':\n')
-        texts = texts.replace('*', '')
         lines = texts.split('\n')
         formatted_lines = []
         for i in range(len(lines)):
-            if ':' in lines[i]:
-                formatted_lines.append(dmc.Title(lines[i], order=5, style={'margin-top': '10px'}))
-            elif '#' in lines[i]:
-                lines[i] = lines[i].replace('#', '')
-                formatted_lines.append(dmc.Title(lines[i], order=5, style={'margin-top': '10px'}))
-            elif i == 0:
-                formatted_lines.append(dmc.Text(lines[i]))
-            elif lines[i].strip() == '':
-                formatted_lines.append(dmc.Text(lines[i]))
-            else:
-                lines[i] = lines[i][0:].lstrip('- ')
-                formatted_lines.append(dmc.List(dmc.ListItem(lines[i])))
-
+            formatted_lines.append(dcc.Markdown(lines[i]))
         return formatted_lines
     except:
         alert = dmc.Alert(
@@ -81,58 +66,3 @@ def get_segmentDescriptions(ticker):
             hide=False
         ),
         return alert
-
-
-@callback(
-    [Output(component_id='SegmentResultsRow', component_property='children'),
-     Output(component_id='SegmentResultsTitle', component_property='children')],
-    [Input("ticker", "data"),
-     Input("mantine-provider", "forceColorScheme")],
-)
-def get_segmentResults(ticker,theme):
-    try:
-        if ticker is None:
-            ticker = "TPG_AU"
-        query = "SELECT * FROM `" + ticker[0:-3] + "_segmentResults`"
-        df = get_df_query(query)
-        df.columns = df.columns.str.title()
-        df['Year'] = df['Year'].astype(int)
-        df = df.sort_values(by='Year', ascending=False)
-        underlineIndex = df.index[df['Year'] != df['Year'].shift(-1)].tolist()
-
-        body_style = [
-                         {
-                             'if': {'row_index': underlineIndex},
-                             'borderBottom': '1px solid',
-                         }
-                     ]
-
-        if theme == 'light':
-            theme_style = {
-                'backgroundColor': 'rgb(255, 255, 255)',
-                'color': 'black'
-            }
-        else:
-            theme_style = {
-                'backgroundColor': 'rgb(50, 50, 50)',
-                'color': 'white'
-            }
-
-        table = dash_table.DataTable(
-            id='table',
-            columns=[{"name": i, "id": i} for i in df.columns],
-            data=df.to_dict('records'),
-            style_header={'backgroundColor': 'rgb(30, 30, 30)',
-                          'color': 'white',
-                          'fontWeight': 'bold',
-                          'textAlign': 'center'},
-            style_table = {'overflowX': 'auto', 'height': '800px', 'overflowY': 'auto','minWidth': '100%','z-index':'0'},
-            style_cell={'minWidth': '120px', 'width': '120px', 'maxWidth': '600px',
-                        'textAlign': 'center'},
-            style_data_conditional=body_style,
-            style_data=theme_style,
-            editable=False,
-            )
-        return table, dmc.Title("Segment Results", order=4)
-    except:
-        return html.Div(" "), html.Div(" ")

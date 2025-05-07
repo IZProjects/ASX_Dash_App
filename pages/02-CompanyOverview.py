@@ -99,7 +99,6 @@ layout = dmc.Box([
                              dmc.Badge(id='currency_badge', color="indigo", className="me-1"),
                              dmc.Badge(id='sector_badge', color="red", className="me-1"),
                              dmc.Badge(id='industry_badge', color="violet", className="me-1"),
-                             dmc.Badge(id='category_badge', color="gray", className="me-1")
                          ], gap='sm')
                      )
                      ], span={"base": 8, "md": 10}),
@@ -255,8 +254,7 @@ def print_description(metadata):
      [Output("stock_name", "children"),
       Output("sector_badge", "children"),
      Output("industry_badge", "children"),
-     Output("currency_badge", "children"),
-      Output("category_badge", "children"),],
+     Output("currency_badge", "children"),],
      [Input("single_ticker_metadata", "data"),
       Input("ticker", "data")]
 )
@@ -268,17 +266,7 @@ def print_tags(metadata,ticker):
     currency = df_metadata.at[0, 'currency']
     df_metadata['title'] = df_metadata['name'] + ' (' + df_metadata['symbol'] + ')'
     name = df_metadata.at[0, 'title']
-    if ticker is None:
-        ticker = "TPG_AU"
-
-    df = get_df_tblName("Peter_Lynch_Category")
-    if ticker[0:3] in df['ticker'].values:
-        category = df[df['ticker'] == ticker[0:3]]
-        category = category.reset_index(drop=True)
-        category = category.at[0, 'content']
-    else:
-        category = ''
-    return name,sector,industry,currency,category
+    return name,sector,industry,currency
 
 @callback(
     Output("collapse", "opened"),

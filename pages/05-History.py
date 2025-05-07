@@ -28,7 +28,6 @@ layout = dmc.Box([
                              dmc.Badge(id='currency_badge', color="indigo", className="me-1"),
                              dmc.Badge(id='sector_badge', color="red", className="me-1"),
                              dmc.Badge(id='industry_badge', color="violet", className="me-1"),
-                             dmc.Badge(id='category_badge', color="gray", className="me-1")
                          ], gap='sm')
                      )
                      ], span={"base": 8, "md": 10}),
@@ -104,24 +103,9 @@ def get_timeline(long_history, short_history, controls):
         for i in range(len(texts)):
             formatted_lines = []
             formatted_lines.append(dmc.Text(years[i], size='xl', fw=700, td='underline'))
-            texts[i] = texts[i].replace(':', ':\n')
-            texts[i] = texts[i].replace('*', '')
             lines = texts[i].split('\n')
             for i in range(len(lines)):
-                if ':' in lines[i]:
-                    formatted_lines.append(dmc.Text(lines[i], fw=500, style={'margin-top': '10px'}))
-                elif '#' in lines[i]:
-                    lines[i] = lines[i].replace('#', '')
-                    formatted_lines.append(dmc.Text(lines[i], fw=700, style={'margin-top': '10px'}))
-                elif i == 0 and controls == 'Long':
-                    formatted_lines.append(dmc.Text(lines[i]))
-                elif lines[i].strip() == '':
-                    formatted_lines.append(dmc.Text(lines[i]))
-                else:
-                    lines[i] = lines[i][0:].lstrip('- ')
-                    formatted_lines.append(dmc.List(dmc.ListItem(lines[i])))
-
-
+                formatted_lines.append(dcc.Markdown(lines[i]))
             formatted_text.append(formatted_lines)
         contentForTimeline = []
         for i in range(len(years)):

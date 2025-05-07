@@ -80,7 +80,6 @@ layout = dmc.Box([
                              dmc.Badge(id='currency_badge', color="indigo", className="me-1"),
                              dmc.Badge(id='sector_badge', color="red", className="me-1"),
                              dmc.Badge(id='industry_badge', color="violet", className="me-1"),
-                             dmc.Badge(id='category_badge', color="gray", className="me-1")
                          ], gap='sm')
                      )
                      ], span={"base": 8, "md": 10}),
