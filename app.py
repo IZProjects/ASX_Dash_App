@@ -52,6 +52,34 @@ def sitemap():
 dash._dash_renderer._set_react_version("18.2.0")
 app = dash.Dash(__name__, server=server, use_pages=True, external_stylesheets=dmc.styles.ALL, title='ASX Stock Market Research & Analysis Tools')
 
+app.index_string = '''
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>My Dash App</title>
+        <!-- Google tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-1M51GV8PK8"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-1M51GV8PK8');
+        </script>
+        {%metas%}
+        {%favicon%}
+        {%css%}
+    </head>
+    <body>
+        {%app_entry%}
+        <footer>
+            {%config%}
+            {%scripts%}
+            {%renderer%}
+        </footer>
+    </body>
+</html>
+'''
 
 
 layout = dmc.AppShell(
