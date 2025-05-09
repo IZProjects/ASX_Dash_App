@@ -569,7 +569,6 @@ def create_desc_tbl(peers,ticker):
         other_rows = df[df['symbol'] != ticker[0:-3]].sort_values(by='symbol')
         df = pd.concat([first_row, other_rows], ignore_index=True)
         df.columns = [col.capitalize() for col in df.columns]
-        #table = dbc.Table.from_dataframe(df)
         table = dmc.Table(data=genTBLContent(df), highlightOnHover=True,)
         return table
     except:

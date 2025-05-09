@@ -504,11 +504,6 @@ def print_values(theme, n_clicks, ratio_items, pct_items, singular_items, numeri
         KMBUpdated = [col for col in KMB if col in new_df.columns]
         new_df[KMBUpdated] = new_df[KMBUpdated].astype(float)
 
-        #KMBUpdated = [col for col in KMB if col in new_df.columns]
-        #KMBUpdated = list(set(KMBUpdated))
-        #new_df[KMBUpdated] = new_df[KMBUpdated].map(format_number)
-
-
         if theme == 'light':
             theme_style = {
                 'backgroundColor': 'rgb(255, 255, 255)',

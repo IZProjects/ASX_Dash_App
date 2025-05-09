@@ -18,8 +18,6 @@ value = df['value'].to_list()
 
 options = [{"label": lbl, "value": val} for lbl, val in zip(label, value)]
 
-
-
 server = Flask(__name__)
 
 @server.route("/robots.txt")
