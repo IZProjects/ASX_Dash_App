@@ -12,7 +12,7 @@ layout = dmc.Box([
     dmc.Text("Please read the following terms and conditions carefully. By accessing or using this website, you confirm that you have read, understood, and agree to be bound by these Terms of Use.", style={'margin-bottom': '20px'}),
 
     dmc.Title(f"1. About Butterfly Technologies", order=4, style={'margin-bottom': '10px'}),
-    dmc.Text("Butterfly Technologies Pty Ltd (“Butterfly Technologies”, “we”, “our”, or “us”) operates this website to provide general information, commentary, and data related to financial markets. Butterfly Technologies is not a financial institution or a licensed provider of financial advice. We are an information provider and content publisher only."),
+    dmc.Text("Butterfly Technologies Pty Ltd (“Butterfly Technologies”, “we”, “our”, or “us”) operates this website to provide general information, commentary, and data related to financial markets. Butterfly Technologies is not a financial institution or a licensed provider of financial advice. We are an information provider and content publisher only. Contact us at info@tickersight.com.au for any queries."),
     dmc.Container(html.Hr(), fluid=True, style={'margin-top': '20px', 'margin-bottom': '20px'}),
 
     dmc.Title(f"2. General Information Only", order=4, style={'margin-bottom': '10px'}),

@@ -9,7 +9,7 @@ dash.register_page(__name__, name='privacy-policy') # '/' is home page
 layout = dmc.Box([
     dmc.Title(f"Privacy Policy", order=1, style={'margin-bottom': '10px'}),
     dmc.Text("Effective April 13th 2025"),
-    dmc.Text("Butterfly Technologies Pty Ltd (“Butterfly Technologies”, “we”, “our”, or “us”) is committed to safeguarding your privacy. This Privacy Policy outlines how we collect, use, store, and disclose your personal information when you interact with our website and services. By accessing or using our website, you agree to the terms set out in this Policy.", style={'margin-bottom': '20px'}),
+    dmc.Text("Butterfly Technologies Pty Ltd (“Butterfly Technologies”, “we”, “our”, or “us”) is committed to safeguarding your privacy. This Privacy Policy outlines how we collect, use, store, and disclose your personal information when you interact with our website and services. By accessing or using our website, you agree to the terms set out in this Policy. Contact us at info@tickersight.com.au for any queries.", style={'margin-bottom': '20px'}),
 
     dmc.Title(f"1. Overview", order=4, style={'margin-bottom': '10px'}),
     dmc.Text("Butterfly Technologies does not collect personally identifiable information unless it is voluntarily submitted by you. This may occur when you create an account, contact us, subscribe to communications, interact on social media, or engage with other features of the site.\nWe are committed to handling your personal data responsibly and in accordance with the Privacy Act 1988 and the Australian Privacy Principles (APPs)."),
