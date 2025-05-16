@@ -1,4 +1,4 @@
-from dash import dcc, Input, Output, clientside_callback
+from dash import dcc, Input, Output, clientside_callback, callback, html
 import dash_mantine_components as dmc
 from dash_iconify import DashIconify
 
@@ -22,6 +22,49 @@ menu = dmc.Menu(
                         id='avatar-indicator',
                         children=[dmc.ActionIcon(DashIconify(icon="solar:settings-outline", width=150), variant='subtle')]
                     )
+                ),
+                dmc.MenuDropdown(
+                    [
+                        dmc.MenuItem(
+                            dmc.Text(
+                                id="welcome-text",
+                                size="sm",
+                            ),
+                        ),
+                        dmc.MenuItem(
+                            dmc.NavLink(
+                                label="Login",
+                                href='/login',
+                                rightSection=DashIconify(icon="solar:login-outline", width=20),
+                                id='loginMenuItem'
+
+                            ),
+                        ),
+
+
+                        dmc.MenuItem(
+                            html.A(
+                                children=[
+                                    html.Span("Logout"),
+                                    DashIconify(icon="hugeicons:login-01", width=20)
+                                ],
+                                href="/logout",
+                                id="logoutMenuItem",
+                                style={
+                                    "display": "flex",
+                                    "justifyContent": "space-between",
+                                    "alignItems": "center",
+                                    "textDecoration": "none",
+                                    "color": "inherit",
+                                    "padding": "0.2rem 0.6rem",
+                                    "borderRadius": "1px",
+                                    "transition": "background-color 0.2s",
+                                    "width": "100%",  # ensures the spacing fills the container
+                                    "boxSizing": "border-box",
+                                }
+                            )
+                        ),
+                    ]
                 ),
             ]
         )
@@ -54,3 +97,12 @@ clientside_callback(
     Output("search-dropdown", "className"),
     Input("mantine-provider", "forceColorScheme")
 )
+
+@callback(
+    Output("welcome-text", "children"),
+    Input("user-store", "data")
+)
+def update_welcome_text(data):
+    username = data.get("username", "guest")
+    return f"Hi {username}!"
+

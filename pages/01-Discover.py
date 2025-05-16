@@ -97,7 +97,6 @@ layout = dmc.Box([
     dmc.Group([dcc.Markdown(f'[Terms and Conditions](/toc)'),dcc.Markdown(f'[Privacy Policy](/privacy-policy)')], gap='md', justify='flex-end'),
 ])
 
-
 @callback(
     [Output('gain_store', 'data'),
      Output('loss_store', 'data'),
