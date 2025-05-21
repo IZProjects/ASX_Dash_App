@@ -3,8 +3,11 @@ from dash import html, callback, Output, Input, dash_table, dcc
 import dash_mantine_components as dmc
 from mysql_connect_funcs import get_cursor, get_df_query
 import re
+from components.login_form import login
+from flask import session
 
 dash.register_page(__name__, name='Business Profile', title='Business Profile', description='Get a summary of all the key information about the business')
+
 
 layout = dmc.Box([
     html.H1(children="Business Profile | Tickersight", hidden=True),
@@ -34,8 +37,17 @@ layout = dmc.Box([
 
     dmc.Group([dcc.Markdown(f'[Terms and Conditions](/toc)'),dcc.Markdown(f'[Privacy Policy](/privacy-policy)')], gap='md', justify='flex-end'),
 
+    dmc.Container(id='secret_container'),
+
 
 ])
+
+"""def layout(**kwargs):
+    if 'email' not in session:
+        return dmc.Center(login)
+    else:
+        return layout_page"""
+
 
 @callback(
     Output(component_id='SegmentDescriptionRow', component_property='children'),

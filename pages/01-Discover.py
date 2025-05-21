@@ -131,7 +131,7 @@ def load_data(pathname):
     discovery_growth = get_df_tblName("discovery_growth").to_dict()
     discovery_growth_100M = get_df_tblName("discovery_growth_100M").to_dict()
 
-    query = "SELECT * FROM insiderTrades_total ORDER BY Date DESC LIMIT 60;"
+    query = "SELECT * FROM insiderTrades_today;"
     df_IT = get_df_query(query)
     df_IT['Date'] = pd.to_datetime(df_IT['Date'], format='%d %b %Y %I:%M%p')
     df_IT = df_IT.sort_values('Date', ascending=False).reset_index(drop=True)

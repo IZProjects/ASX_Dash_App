@@ -18,6 +18,7 @@ from authlib.integrations.flask_client import OAuth
 from datetime import timedelta
 from flask import make_response
 
+
 #------------------------------------ LOAD TICKERS ---------------------------------------
 
 df = get_df_tblName("metadataTBL")
