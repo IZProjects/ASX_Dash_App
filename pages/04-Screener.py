@@ -3,7 +3,8 @@ from dash import dcc, html, Input, Output, State, callback, ALL, clientside_call
 import dash_mantine_components as dmc
 import re
 from mysql_connect_funcs import get_df_query
-
+from components.login_form import login
+from flask import session
 
 
 dash.register_page(__name__, name='Screener', title='Stock Screener | Tickersight', description='Tickersight offers an institutional-grade stock screener for the ASX')
@@ -173,7 +174,7 @@ modal = html.Div(
 )
 
 
-layout = dmc.Box([
+layout_page = dmc.Box([
     html.H1(children="ASX Stock Screener | Tickersight", hidden=True),
     dcc.Store(id='store-selected-values', storage_type='session', data={}),
     dcc.Store(id='store-selected-values', storage_type='session', data={}),
@@ -190,9 +191,15 @@ layout = dmc.Box([
                gap='md', justify='space-between',className="justify-content-between"),
     dmc.Container(id='output-container', fluid=True, style={'margin-top': '20px'}),
     dmc.Container(html.Hr(), fluid=True, style={'margin-top': '50px', 'margin-bottom': '20px'}),
-    dmc.Group([dcc.Markdown(f'[Terms and Conditions](/toc)'),dcc.Markdown(f'[Privacy Policy](/privacy-policy)')], gap='md', justify='flex-end'),
+    dmc.Group([dcc.Markdown(f'Contact us at info@tickersight.com.au'),dcc.Markdown(f'[Terms and Conditions](/toc)'),dcc.Markdown(f'[Privacy Policy](/privacy-policy)')], gap='md', justify='flex-end'),
 
 ])
+
+def layout(**kwargs):
+    if 'email' not in session:
+        return dmc.Center(login)
+    else:
+        return layout_page
 
 clientside_callback(
     """

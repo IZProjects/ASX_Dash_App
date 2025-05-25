@@ -8,6 +8,8 @@ import dash_mantine_components as dmc
 from mysql_connect_funcs import get_df_tblName, get_df_query
 from utils.df_to_mantineTBL import genTBLContent
 import numpy as np
+from components.login_form import login
+from flask import session
 
 pd.options.mode.chained_assignment = None  # default='warn'
 
@@ -85,7 +87,7 @@ button_group2 = dmc.SegmentedControl(
 )
 
 
-layout = dmc.Box([
+layout_page = dmc.Box([
     html.H1(children="Company Overview | Tickersight", hidden=True),
     dcc.Store(id="dict_daily", storage_type='session', data={}),
     dcc.Store(id="dict_weekly", storage_type='session', data={}),
@@ -152,11 +154,17 @@ layout = dmc.Box([
 
     dmc.Container(html.Hr(), fluid=True, style={'margin-top': '50px', 'margin-bottom': '20px'}),
 
-    dmc.Group([dcc.Markdown(f'[Terms and Conditions](/toc)'),dcc.Markdown(f'[Privacy Policy](/privacy-policy)')], gap='md', justify='flex-end'),
+    dmc.Group([dcc.Markdown(f'Contact us at info@tickersight.com.au'),dcc.Markdown(f'[Terms and Conditions](/toc)'),dcc.Markdown(f'[Privacy Policy](/privacy-policy)')], gap='md', justify='flex-end'),
 
 
 ], style={'margin-left': '30px'})
 
+
+def layout(**kwargs):
+    if 'email' not in session:
+        return dmc.Center(login)
+    else:
+        return layout_page
 
 @callback(
     [Output("stock_price", "children"),

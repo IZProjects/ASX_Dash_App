@@ -4,7 +4,8 @@ import pandas as pd
 import plotly.graph_objects as go
 import dash_mantine_components as dmc
 from mysql_connect_funcs import get_df_tblName, get_df_query
-
+from components.login_form import login
+from flask import session
 
 dash.register_page(__name__, path='/', name='Discover', title='Discover ASX Stocks',
                    description="""Tickersight allows individual investors to access institutional-grade stock market data and analysis. 
@@ -49,7 +50,7 @@ GLA_controls = dmc.SegmentedControl(
 )
 
 
-layout = dmc.Box([
+layout_page = dmc.Box([
     html.H1(children="ASX Stock Market Research & Analysis Tools", hidden=True),
     dcc.Store(id="gain_store", storage_type='session',),
     dcc.Store(id="loss_store", storage_type='session',),
@@ -94,8 +95,14 @@ layout = dmc.Box([
     dmc.Container(style={'margin-bottom': '20px'}, fluid=True, id='growthStory_container'),
 
     dmc.Container(html.Hr(), fluid=True, style={'margin-top': '50px', 'margin-bottom': '20px'}),
-    dmc.Group([dcc.Markdown(f'[Terms and Conditions](/toc)'),dcc.Markdown(f'[Privacy Policy](/privacy-policy)')], gap='md', justify='flex-end'),
+    dmc.Group([dcc.Markdown(f'Contact us at info@tickersight.com.au'),dcc.Markdown(f'[Terms and Conditions](/toc)'),dcc.Markdown(f'[Privacy Policy](/privacy-policy)')], gap='md', justify='flex-end'),
 ])
+
+def layout(**kwargs):
+    if 'email' not in session:
+        return dmc.Center(login)
+    else:
+        return layout_page
 
 @callback(
     [Output('gain_store', 'data'),

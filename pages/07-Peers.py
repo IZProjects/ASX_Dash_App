@@ -6,6 +6,8 @@ import dash_mantine_components as dmc
 from mysql_connect_funcs import get_df_tblName, get_df_query, get_cursor
 import plotly.graph_objects as go
 from utils.df_to_mantineTBL import genTBLContent
+from components.login_form import login
+from flask import session
 
 dash.register_page(__name__, name='Peer Comparison', title='Peer Comparison', description='Research your stocks by comparing them to their key competitors and peers') # '/' is home page
 
@@ -62,7 +64,7 @@ def format_number(num_str):
     return formatted_number
 
 
-layout = dmc.Box([
+layout_page = dmc.Box([
     html.H1(children="Peer Comparison | Tickersight", hidden=True),
     dcc.Store(id="target_dict", storage_type='session', data={}),
     dcc.Store(id="peer1_dict", storage_type='session', data={}),
@@ -117,10 +119,14 @@ layout = dmc.Box([
 
     dmc.Container(html.Hr(), fluid=True, style={'margin-top': '50px', 'margin-bottom': '20px'}),
 
-    dmc.Group([dcc.Markdown(f'[Terms and Conditions](/toc)'),dcc.Markdown(f'[Privacy Policy](/privacy-policy)')], gap='md', justify='flex-end'),
-
-
+    dmc.Group([dcc.Markdown(f'Contact us at info@tickersight.com.au'),dcc.Markdown(f'[Terms and Conditions](/toc)'),dcc.Markdown(f'[Privacy Policy](/privacy-policy)')], gap='md', justify='flex-end'),
 ])
+
+def layout(**kwargs):
+    if 'email' not in session:
+        return dmc.Center(login)
+    else:
+        return layout_page
 
 clientside_callback(
     """

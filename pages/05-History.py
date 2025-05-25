@@ -3,6 +3,8 @@ from dash import dcc, html, callback, Output, Input
 import pandas as pd
 import dash_mantine_components as dmc
 from mysql_connect_funcs import get_df_query
+from components.login_form import login
+from flask import session
 
 dash.register_page(__name__, name='History', title='Company History', description='Get a comprehensive summary of all the key events that have happened to any ASX company up tothis point.')
 
@@ -16,7 +18,7 @@ button = dmc.SegmentedControl(
 )
 
 
-layout = dmc.Box([
+layout_page = dmc.Box([
     html.H1(children="ASX Company History | Tickersight", hidden=True),
     dcc.Store(id="long_history", storage_type='session', data={}),
     dcc.Store(id="short_history", storage_type='session', data={}),
@@ -46,10 +48,16 @@ layout = dmc.Box([
 
     dmc.Container(html.Hr(), fluid=True, style={'margin-top': '50px', 'margin-bottom': '20px'}),
 
-    dmc.Group([dcc.Markdown(f'[Terms and Conditions](/toc)'),dcc.Markdown(f'[Privacy Policy](/privacy-policy)')], gap='md', justify='flex-end'),
+    dmc.Group([dcc.Markdown(f'Contact us at info@tickersight.com.au'),dcc.Markdown(f'[Terms and Conditions](/toc)'),dcc.Markdown(f'[Privacy Policy](/privacy-policy)')], gap='md', justify='flex-end'),
 
 
 ])
+
+def layout(**kwargs):
+    if 'email' not in session:
+        return dmc.Center(login)
+    else:
+        return layout_page
 
 @callback(
     [Output(component_id='long_history', component_property='data'),

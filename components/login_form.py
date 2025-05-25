@@ -30,13 +30,13 @@ login = dmc.Paper(
                         method='POST',
                         children=[
                             dmc.Text("Sign in ", size='xl', fw=700),
-                            dmc.Text("Please log in to continue", c='gray', size='xs', mb=10),
+                            dmc.Text("Please log in to continue. No registration required.", c='gray', size='xs', mb=10),
                             html.A(
                                 href='/signingoogle',
                                 style=loginWithGoogleStyle,
                                 children=[
                                     dmc.Button(
-                                        "Google",
+                                        "Login with Google",
                                         variant="outline",
                                         color="royalblue",
                                         fullWidth=True,

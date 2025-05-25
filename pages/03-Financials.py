@@ -3,6 +3,8 @@ from dash import html, Input, Output, callback, dash_table, clientside_callback,
 import pandas as pd
 import dash_mantine_components as dmc
 from mysql_connect_funcs import get_df_tblName
+from components.login_form import login
+from flask import session
 
 dash.register_page(__name__, name='Financials', title='Financials', description='Get 20+ years of income statements, balance sheets, cashflow statements as well as other key metrics and financial data for all ASX stocks. ')
 def convert_to_percentage(value):
@@ -98,7 +100,7 @@ export_btn2 = dmc.Button("Export", id='exportBtn2', color="gray", size='sm')
 
 
 
-layout = dmc.Box([
+layout_page = dmc.Box([
     dmc.Grid([
         dmc.GridCol([dmc.Grid(dmc.Title(id='stock_name', order=2), style={'margin-bottom': '10px'}),
                      dmc.Grid(
@@ -138,9 +140,16 @@ layout = dmc.Box([
 
     dmc.Container(html.Hr(), fluid=True, style={'margin-top': '50px', 'margin-bottom': '20px'}),
 
-    dmc.Group([dcc.Markdown(f'[Terms and Conditions](/toc)'),dcc.Markdown(f'[Privacy Policy](/privacy-policy)')], gap='md', justify='flex-end'),
+    dmc.Group([dcc.Markdown(f'Contact us at info@tickersight.com.au'),dcc.Markdown(f'[Terms and Conditions](/toc)'),dcc.Markdown(f'[Privacy Policy](/privacy-policy)')], gap='md', justify='flex-end'),
 
 ])
+
+def layout(**kwargs):
+    if 'email' not in session:
+        return dmc.Center(login)
+    else:
+        return layout_page
+
 
 @callback(
     [Output(component_id='table-container', component_property='children'),
