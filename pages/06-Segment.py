@@ -9,7 +9,7 @@ from flask import session
 dash.register_page(__name__, name='Business Profile', title='Business Profile', description='Get a summary of all the key information about the business')
 
 
-layout_page = dmc.Box([
+layout = dmc.Box([
     html.H1(children="Business Profile | Tickersight", hidden=True),
     dmc.Grid([
         dmc.GridCol([dmc.Grid(dmc.Title(id='stock_name', order=2), style={'margin-bottom': '10px'}),
@@ -38,11 +38,11 @@ layout_page = dmc.Box([
     dmc.Group([dcc.Markdown(f'Contact us at info@tickersight.com.au'),dcc.Markdown(f'[Terms and Conditions](/toc)'),dcc.Markdown(f'[Privacy Policy](/privacy-policy)')], gap='md', justify='flex-end'),
 ])
 
-def layout(**kwargs):
+"""def layout(**kwargs):
     if 'email' not in session:
         return dmc.Center(login)
     else:
-        return layout_page
+        return layout_page"""
 
 
 @callback(

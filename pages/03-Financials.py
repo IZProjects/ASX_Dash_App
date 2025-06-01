@@ -100,7 +100,7 @@ export_btn2 = dmc.Button("Export", id='exportBtn2', color="gray", size='sm')
 
 
 
-layout_page = dmc.Box([
+layout = dmc.Box([
     dmc.Grid([
         dmc.GridCol([dmc.Grid(dmc.Title(id='stock_name', order=2), style={'margin-bottom': '10px'}),
                      dmc.Grid(
@@ -144,11 +144,11 @@ layout_page = dmc.Box([
 
 ])
 
-def layout(**kwargs):
+"""def layout(**kwargs):
     if 'email' not in session:
         return dmc.Center(login)
     else:
-        return layout_page
+        return layout_page"""
 
 
 @callback(

@@ -64,7 +64,7 @@ def format_number(num_str):
     return formatted_number
 
 
-layout_page = dmc.Box([
+layout = dmc.Box([
     html.H1(children="Peer Comparison | Tickersight", hidden=True),
     dcc.Store(id="target_dict", storage_type='session', data={}),
     dcc.Store(id="peer1_dict", storage_type='session', data={}),
@@ -122,11 +122,11 @@ layout_page = dmc.Box([
     dmc.Group([dcc.Markdown(f'Contact us at info@tickersight.com.au'),dcc.Markdown(f'[Terms and Conditions](/toc)'),dcc.Markdown(f'[Privacy Policy](/privacy-policy)')], gap='md', justify='flex-end'),
 ])
 
-def layout(**kwargs):
+"""def layout(**kwargs):
     if 'email' not in session:
         return dmc.Center(login)
     else:
-        return layout_page
+        return layout_page"""
 
 clientside_callback(
     """

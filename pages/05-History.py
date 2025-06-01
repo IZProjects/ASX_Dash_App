@@ -18,7 +18,7 @@ button = dmc.SegmentedControl(
 )
 
 
-layout_page = dmc.Box([
+layout = dmc.Box([
     html.H1(children="ASX Company History | Tickersight", hidden=True),
     dcc.Store(id="long_history", storage_type='session', data={}),
     dcc.Store(id="short_history", storage_type='session', data={}),
@@ -53,11 +53,11 @@ layout_page = dmc.Box([
 
 ])
 
-def layout(**kwargs):
+"""def layout(**kwargs):
     if 'email' not in session:
         return dmc.Center(login)
     else:
-        return layout_page
+        return layout_page"""
 
 @callback(
     [Output(component_id='long_history', component_property='data'),

@@ -87,7 +87,7 @@ button_group2 = dmc.SegmentedControl(
 )
 
 
-layout_page = dmc.Box([
+layout = dmc.Box([
     html.H1(children="Company Overview | Tickersight", hidden=True),
     dcc.Store(id="dict_daily", storage_type='session', data={}),
     dcc.Store(id="dict_weekly", storage_type='session', data={}),
@@ -160,12 +160,12 @@ layout_page = dmc.Box([
 ], style={'margin-left': '30px'})
 
 
-def layout(**kwargs):
+"""def layout(**kwargs):
     if 'email' not in session:
         return dmc.Center(login)
     else:
         return layout_page
-
+"""
 @callback(
     [Output("stock_price", "children"),
     Output("price_change", "children"),

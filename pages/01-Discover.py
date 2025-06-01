@@ -50,7 +50,7 @@ GLA_controls = dmc.SegmentedControl(
 )
 
 
-layout_page = dmc.Box([
+layout = dmc.Box([
     html.H1(children="ASX Stock Market Research & Analysis Tools", hidden=True),
     dcc.Store(id="gain_store", storage_type='session',),
     dcc.Store(id="loss_store", storage_type='session',),
@@ -98,11 +98,11 @@ layout_page = dmc.Box([
     dmc.Group([dcc.Markdown(f'Contact us at info@tickersight.com.au'),dcc.Markdown(f'[Terms and Conditions](/toc)'),dcc.Markdown(f'[Privacy Policy](/privacy-policy)')], gap='md', justify='flex-end'),
 ])
 
-def layout(**kwargs):
+"""def layout(**kwargs):
     if 'email' not in session:
         return dmc.Center(login)
     else:
-        return layout_page
+        return layout_page"""
 
 @callback(
     [Output('gain_store', 'data'),

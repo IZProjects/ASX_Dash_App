@@ -174,7 +174,7 @@ modal = html.Div(
 )
 
 
-layout_page = dmc.Box([
+layout = dmc.Box([
     html.H1(children="ASX Stock Screener | Tickersight", hidden=True),
     dcc.Store(id='store-selected-values', storage_type='session', data={}),
     dcc.Store(id='store-selected-values', storage_type='session', data={}),
@@ -195,11 +195,11 @@ layout_page = dmc.Box([
 
 ])
 
-def layout(**kwargs):
+"""def layout(**kwargs):
     if 'email' not in session:
         return dmc.Center(login)
     else:
-        return layout_page
+        return layout_page"""
 
 clientside_callback(
     """
