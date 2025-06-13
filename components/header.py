@@ -4,7 +4,7 @@ from dash_iconify import DashIconify
 
 burger = dmc.Burger(id="burger-button", size="sm", hiddenFrom="md", opened=False),
 
-dropdown = dcc.Dropdown(id="my-dynamic-dropdown", placeholder="Search...", className='Dropdown-2', optionHeight=50)
+dropdown = dcc.Dropdown(id="my-dynamic-dropdown", placeholder="Search...", className='Dropdown-2', optionHeight=55)
 
 theme_toggle = dmc.Switch(
     offLabel=DashIconify(icon="radix-icons:sun", width=15, color=dmc.DEFAULT_THEME["colors"]["yellow"][8]),
@@ -12,7 +12,9 @@ theme_toggle = dmc.Switch(
     id="color-scheme-switch",
     persistence=True,
     persistence_type='local',
-    checked=False
+    checked=False,
+    label= "Theme",
+    labelPosition='left'
 )
 
 menu = dmc.Menu(
@@ -37,7 +39,6 @@ menu = dmc.Menu(
                                 href='/login',
                                 rightSection=DashIconify(icon="solar:login-outline", width=20),
                                 id='loginMenuItem'
-
                             ),
                         ),
 
@@ -64,6 +65,8 @@ menu = dmc.Menu(
                                 }
                             )
                         ),
+                        dmc.MenuItem(theme_toggle),
+
                     ]
                 ),
             ]
@@ -76,7 +79,7 @@ header = dmc.Grid(
         dmc.GridCol(burger, span="content"),
         dmc.GridCol(title, span="content"),
         dmc.GridCol(dropdown, span="auto", id='search-dropdown'),
-        dmc.GridCol(theme_toggle, span="content"),
+        #dmc.GridCol(theme_toggle, span="content"),
         dmc.GridCol(menu, span="content"),
     ],
     gutter="xl",
