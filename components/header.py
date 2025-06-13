@@ -82,7 +82,7 @@ header = dmc.Grid(
         #dmc.GridCol(theme_toggle, span="content"),
         dmc.GridCol(menu, span="content"),
     ],
-    gutter="xl",
+    gutter={"base": "xs", "md": "xl"},
     justify="space-around",
     align="center",
 )
